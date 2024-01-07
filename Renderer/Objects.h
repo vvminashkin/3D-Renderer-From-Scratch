@@ -1,8 +1,6 @@
-//
-// Created by supernyan on 07.01.24.
-//
+#pragma once
+namespace Renderer{
+        class AnyObject{
 
-#ifndef INC_3D_RENDERER_FROM_SCRATCH_OBJECTS_H
-#define INC_3D_RENDERER_FROM_SCRATCH_OBJECTS_H
-
-#endif //INC_3D_RENDERER_FROM_SCRATCH_OBJECTS_H
+        };
+};
