@@ -2,24 +2,25 @@
 
 #include <Eigen/Dense>
 #include "World.h"
-
+#include "Screen.h"
 namespace renderer {
-    class Renderer {
-    public:
-        Renderer(size_t width, size_t height);
+class Renderer {
+    using Matrix4d = Eigen::Matrix4d;
 
-        void Draw();
-        void DrawTriangle(const Triangle&,const World::ObjectContainer&);
+public:
+    Renderer(const Screen &);
 
-    private:
-        void ShiftTriangleCoordinates(const World::ObjectContainer & owner, std::array<Vertex,3>*);
-        World world_;
-        Eigen::Matrix<RGB, Eigen::Dynamic, Eigen::Dynamic> screen_;
-        size_t height_;
-        size_t width_;
+    void Draw();
 
-
-        void ShiftTriangleToAlignCamera(std::array<Vertex, 3> *);
-        static void ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d&, std::array<Vertex,3>*);
-    };
-}
+private:
+    void ShiftTriangleCoordinates(const World::ObjectHolder &owner, std::array<Vertex, 3> *);
+    void ShiftTriangleToAlignCamera(std::array<Vertex, 3> *);
+    void DrawTriangle(const Triangle &, const World::ObjectHolder &);
+    static Matrix4d MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
+                                                        const Vector3d &offset);
+    static void ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d &,
+                                                     std::array<Vertex, 3> *);
+    World world_;
+    Screen screen_;
+};
+}  // namespace renderer

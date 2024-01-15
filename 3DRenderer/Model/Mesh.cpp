@@ -1,10 +1,11 @@
 #include "Mesh.h"
-namespace renderer{
-const std::vector<Vertex> &Mesh::GetVertices() const {
-    return vertices_;
+
+namespace renderer {
+Iterable<Mesh::TrianglesConstIterator> Mesh::GetTrianglesIterable() const {
+    return Iterable(triangles_.begin(), triangles_.end());
 }
 
-    const std::vector<Triangle> &Mesh::GetTriangles() const {
-        return triangles_;
-    }
+Iterable<Mesh::VerticesConstIterator> Mesh::GetVerticesIterable() const {
+    return Iterable(vertices_.begin(), vertices_.end());
 }
+}  // namespace renderer

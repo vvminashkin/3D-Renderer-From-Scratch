@@ -5,29 +5,55 @@
 #include "Camera.h"
 
 namespace renderer {
-    class World {
+class World {
+public:
+    auto GetObjectsIterable() const;
+
+    void AddObject(AnyObject);
+
+    void AddObject(AnyObject, const Vector3d &);
+
+    const Quaterniond &GetCameraRotation() const;
+
+    const Vector3d GetCameraPosition() const;
+
+    const Camera& GetCamera()const;
+
+    class CameraHolder : public Camera {
     public:
-        struct ObjectContainer;
-        const std::vector<ObjectContainer> &GetObjects();
+        CameraHolder(const Camera &);
+        const Vector3d &GetCoordinates() const;
+        const Quaterniond &GetAngle() const;
 
-        void AddObject(AnyObject object);
-
-        void AddObject(AnyObject object, Eigen::Vector3d);
-
-        const Eigen::Quaterniond& GetCameraRotation();
-        const Eigen::Vector3d GetCameraPosition();
-        struct ObjectContainer {
-            AnyObject object;
-            Eigen::Vector3d global_coordinates = {0, 0, 0};
-            Eigen::Quaterniond global_rotation_ ;
-        };
+        void SetCoordinates(const Vector3d &);
+        void SetAngle(const Quaterniond &);
 
     private:
-        std::vector<ObjectContainer> objects_;
-        Camera camera_;
-        Eigen::Vector3d camera_coordinates_ = {0,0,0};
-        Eigen::Quaterniond camera_rotation_;
+        Eigen::Vector3d coordinates_ = World::GetOrigin();
+        Eigen::Quaterniond rotation_;
     };
-}
+
+    class ObjectHolder : public AnyObject {
+    public:
+        ObjectHolder(const AnyObject &);
+        ObjectHolder(AnyObject &&) noexcept;
+        const Vector3d &GetCoordinates() const;
+        const Quaterniond &GetAngle() const;
+
+        void SetCoordinates(const Vector3d &);
+        void SetAngle(const Quaterniond &);
+        void SetAngle(const Eigen::AngleAxis<double> &);
 
 
+    private:
+        Eigen::Vector3d coordinates_ = World::GetOrigin();
+        Eigen::Quaterniond rotation_;
+    };
+
+private:
+    static Vector3d GetOrigin();
+    std::vector<ObjectHolder> objects_;
+    std::vector<CameraHolder> cameras_;
+    size_t current_camera_ind_;
+};
+}  // namespace renderer

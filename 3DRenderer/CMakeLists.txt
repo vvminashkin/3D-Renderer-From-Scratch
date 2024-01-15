@@ -7,7 +7,9 @@ add_executable(${PROJECT_NAME} main.cpp Model/Objects.cpp
         Model/World.cpp
         Model/Camera.cpp
         Model/Renderer.cpp
+        Model/Screen.cpp
+        Model/Utils.cpp
 )
 target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "main.out")
+# set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "main.out")

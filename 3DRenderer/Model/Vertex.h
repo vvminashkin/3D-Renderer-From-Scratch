@@ -1,9 +1,11 @@
 #pragma once
-#include <Eigen/Dense>
-namespace renderer{
-   struct Vertex{
 
-       Eigen::Vector3d coordinates;
-       Eigen::Vector3d normal;
-   };
-}
+#include <Eigen/Dense>
+#include "Utils.h"
+namespace renderer {
+struct Vertex {
+    Point coordinates;
+    Direction normal;
+};
+
+}  // namespace renderer
