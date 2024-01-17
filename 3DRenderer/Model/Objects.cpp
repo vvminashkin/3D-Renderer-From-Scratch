@@ -13,7 +13,7 @@ void renderer::RGB::SetG(double val) {
     val_(1) = val;
 }
 double renderer::RGB::GetB() const {
-    return val_(2) ;
+    return val_(2);
 }
 void renderer::RGB::SetB(double val) {
     val_(2) = val;

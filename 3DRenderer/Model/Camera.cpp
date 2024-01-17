@@ -16,7 +16,7 @@ void renderer::Camera::InitPerspective() {
     perspective_matrix_(2, 3) = -2.0 * near_plane_distance_;
     perspective_matrix_(3, 2) = -1;
 }
-void Camera::ApplyPerspectiveTransformation(std::array<Vertex, 3>* vertices) const{
+void Camera::ApplyPerspectiveTransformation(std::array<Vertex, 3>* vertices) const {
     for (auto& i : *vertices) {
         i.coordinates = perspective_matrix_ * i.coordinates.GetHomogeneousCoordinates();
         i.normal = perspective_matrix_ * i.normal.GetHomogeneousCoordinates();

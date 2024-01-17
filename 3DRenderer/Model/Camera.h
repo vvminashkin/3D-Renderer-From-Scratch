@@ -6,7 +6,8 @@
 namespace renderer {
 class Camera {
 public:
-    void ApplyPerspectiveTransformation(std::array<Vertex,3> * )const;
+    void ApplyPerspectiveTransformation(std::array<Vertex, 3>*) const;
+
 private:
     void InitPerspective();
 

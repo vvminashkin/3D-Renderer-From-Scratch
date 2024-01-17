@@ -10,10 +10,9 @@ class Triangle {
 
 public:
     Triangle(const Vector3i& points, const std::vector<Vertex>& parent);
-    const Vector3i GetPoints();
-    std::array<Vertex,3> GetVertexArray()const;
+    const Vector3i GetPoints() const;
+    // std::array<Vertex,3> GetVertexArray()const;
 private:
-    Vector3i points_;// array of indices of parent_vertex_array_
-    const std::vector<Vertex>& parent_vertex_array_; // not sure about this
+    Vector3i points_;  // array of indices of parent_vertex_array_
 };
 }  // namespace renderer

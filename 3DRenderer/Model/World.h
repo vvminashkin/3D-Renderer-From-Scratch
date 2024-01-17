@@ -7,7 +7,10 @@
 namespace renderer {
 class World {
 public:
-    auto GetObjectsIterable() const;
+    auto GetObjectsIterable() const {
+
+        return Iterable(objects_.begin(), objects_.end());
+    };
 
     void AddObject(AnyObject);
 
@@ -17,7 +20,7 @@ public:
 
     const Vector3d GetCameraPosition() const;
 
-    const Camera& GetCamera()const;
+    const Camera &GetCamera() const;
 
     class CameraHolder : public Camera {
     public:
@@ -43,7 +46,6 @@ public:
         void SetCoordinates(const Vector3d &);
         void SetAngle(const Quaterniond &);
         void SetAngle(const Eigen::AngleAxis<double> &);
-
 
     private:
         Eigen::Vector3d coordinates_ = World::GetOrigin();

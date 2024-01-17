@@ -21,9 +21,6 @@ const Quaterniond &World::GetCameraRotation() const {
 const Vector3d World::GetCameraPosition() const {
     return cameras_[current_camera_ind_].GetCoordinates();
 }
-auto World::GetObjectsIterable() const {
-    return Iterable(objects_.begin(), objects_.end());
-}
 const Camera &World::GetCamera() const {
     return cameras_[current_camera_ind_];
 }

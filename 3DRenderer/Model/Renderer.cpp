@@ -1,18 +1,25 @@
 #include "Renderer.h"
 
 namespace renderer {
-void Renderer::Draw() {
+Screen Renderer::Draw(const World &world, size_t width, size_t height) {
+    Screen screen(width, height);
+    for (const auto &object : world.GetObjectsIterable()) {
+        for (const auto &triangle : object->GetMesh().GetTrianglesIterable()) {
+            DrawTriangle(triangle, object, world, screen);
+        }
+    }
 }
 
-void Renderer::DrawTriangle(const Triangle &current, const World::ObjectHolder &owner_object) {
+void Renderer::DrawTriangle(const Triangle &current, const World::ObjectHolder &owner_object,
+                            const World &world, Screen &screen) {
 
-    std::array<Vertex, 3> vertices = current.GetVertexArray();
+    std::array<Vertex, 3> vertices = owner_object->GetMesh().GetTriangleVertices(current);
 
     ShiftTriangleCoordinates(owner_object, &vertices);
 
-    ShiftTriangleToAlignCamera(&vertices);// maybe needs to be camera's method
+    ShiftTriangleToAlignCamera(world, &vertices);
 
-    world_.GetCamera().ApplyPerspectiveTransformation(&vertices);
+    world.GetCamera().ApplyPerspectiveTransformation(&vertices);
 
     // TODO: rasterize triangle
 }
@@ -25,10 +32,10 @@ void Renderer::ShiftTriangleCoordinates(const World::ObjectHolder &owner,
     Renderer::ApplyHomogeneousTransformationMatrix(transformation_matrix, &(*vertices));
 }
 
-void Renderer::ShiftTriangleToAlignCamera(std::array<Vertex, 3> *vertices) {
+void Renderer::ShiftTriangleToAlignCamera(const World &world, std::array<Vertex, 3> *vertices) {
     assert(vertices != nullptr);
     Matrix4d transformation_matrix = Renderer::MakeHomogeneousTransformationMatrix(
-        world_.GetCameraRotation().inverse(), -world_.GetCameraPosition());
+        world.GetCameraRotation().inverse(), -world.GetCameraPosition());
 
     Renderer::ApplyHomogeneousTransformationMatrix(transformation_matrix, &(*vertices));
 }
@@ -43,7 +50,7 @@ void Renderer::ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d &trans
         ver.normal = transformation_matrix * ver.normal.GetHomogeneousCoordinates();
     }
 }
-Renderer::Renderer(const Screen &screen) : screen_(screen) {
+Renderer::Renderer() {
 }
 Renderer::Matrix4d Renderer::MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
                                                                  const Vector3d &offset) {

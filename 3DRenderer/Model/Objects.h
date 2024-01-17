@@ -3,7 +3,7 @@
 #include <Eigen/Dense>
 #include <memory>
 #include "Mesh.h"
-
+#include <QtCore>
 namespace renderer {
 class RGB {
 public:
