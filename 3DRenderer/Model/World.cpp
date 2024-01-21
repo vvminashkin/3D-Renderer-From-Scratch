@@ -12,42 +12,45 @@ void World::AddObject(AnyObject object, const Eigen::Vector3d &global_coordinate
     objects_.back().SetCoordinates(global_coordinates);
     objects_.back().SetAngle(Eigen::AngleAxis<double>(0, Eigen::Vector3d::UnitX()));
 }
-Vector3d World::GetOrigin() {
+World::Vector3d World::GetOrigin() {
     return {0, 0, 0};
 }
-const Quaterniond &World::GetCameraRotation() const {
+const World::Quaterniond &World::GetCameraRotation() const {
     return cameras_[current_camera_ind_].GetAngle();
 }
-const Vector3d World::GetCameraPosition() const {
+const World::Vector3d World::GetCameraPosition() const {
     return cameras_[current_camera_ind_].GetCoordinates();
 }
 const Camera &World::GetCamera() const {
     return cameras_[current_camera_ind_];
 }
 
-World::CameraHolder::CameraHolder(const Camera &cam) : Camera(cam) {
-}
-const Vector3d &World::CameraHolder::GetCoordinates() const {
+const World::Vector3d &World::CameraHolder::GetCoordinates() const {
     return coordinates_;
 }
-const Quaterniond &World::CameraHolder::GetAngle() const {
+const World::Quaterniond &World::CameraHolder::GetAngle() const {
     return rotation_;
 }
 void World::CameraHolder::SetCoordinates(const Vector3d &coordinates) {
+
     coordinates_ = coordinates;
 }
 void World::CameraHolder::SetAngle(const Quaterniond &angle) {
     rotation_ = angle;
 }
+
+World::ObjectHolder::ObjectHolder(AnyObject &&obj, const Vector3d &coord,
+                                  const Quaterniond &rotation)
+    : AnyObject(obj), coordinates_(coord), rotation_(rotation) {
+}
 World::ObjectHolder::ObjectHolder(const AnyObject &obj) : AnyObject(obj) {
 }
-World::ObjectHolder::ObjectHolder(AnyObject &&obj) noexcept
-    : AnyObject(std::forward<AnyObject>(obj)) {
+World::ObjectHolder::ObjectHolder(AnyObject &&obj) noexcept : AnyObject(std::move(obj)) {
 }
-const Vector3d &World::ObjectHolder::GetCoordinates() const {
+const World::Vector3d &World::ObjectHolder::GetCoordinates() const {
     return coordinates_;
 }
-const Quaterniond &World::ObjectHolder::GetAngle() const {
+const World::Quaterniond &World::ObjectHolder::GetAngle() const {
     return rotation_;
 }
 void World::ObjectHolder::SetCoordinates(const Vector3d &coordinates) {
@@ -59,4 +62,8 @@ void World::ObjectHolder::SetAngle(const Quaterniond &angle) {
 void World::ObjectHolder::SetAngle(const Eigen::AngleAxis<double> &angle) {
     rotation_ = angle;
 }
+World::CameraHolder::CameraHolder(Camera camera) {
+    *this = std::move(camera);
+}
+
 }  // namespace renderer

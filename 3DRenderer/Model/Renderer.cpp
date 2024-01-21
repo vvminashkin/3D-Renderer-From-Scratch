@@ -8,6 +8,7 @@ Screen Renderer::Draw(const World &world, size_t width, size_t height) {
             DrawTriangle(triangle, object, world, screen);
         }
     }
+    return screen;
 }
 
 void Renderer::DrawTriangle(const Triangle &current, const World::ObjectHolder &owner_object,

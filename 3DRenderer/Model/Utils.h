@@ -18,19 +18,26 @@ private:
     Iterator end_;
 };
 
-using Vector3d = Eigen::Vector3d;
-using Vector4d = Eigen::Vector4d;
-using Quaterniond = Eigen::Quaterniond;
 class Direction {
 public:
+    using Vector3d = Eigen::Vector3d;
+    using Vector4d = Eigen::Vector4d;
+
+    Direction() = default;
+    Direction(const Vector3d &);
+    Direction(const Vector4d &);
+    template <typename T>
+    Direction(const T &evaluable) {
+        *this = evaluable.eval();
+    }
     Vector3d GetCoordinates() const;
     Vector4d GetHomogeneousCoordinates() const;
-    template <typename T, typename F>
-    Direction& operator=(const Eigen::Product<T, F>& evaluable) {
+    template <typename T>
+    Direction &operator=(const T &evaluable) {
         return *this = evaluable.eval();
     }
-    Direction& operator=(const Vector3d&);
-    Direction& operator=(const Vector4d&);
+    Direction &operator=(const Vector3d &);
+    Direction &operator=(const Vector4d &);
 
 private:
     Vector3d data_;
@@ -38,14 +45,23 @@ private:
 
 class Point {
 public:
+    using Vector3d = Eigen::Vector3d;
+    using Vector4d = Eigen::Vector4d;
+    Point() = default;
+    Point(const Vector3d &);
+    Point(const Vector4d &);
+    template <typename T>
+    Point(const T &evaluable) {
+        *this = evaluable.eval();
+    }
     Vector3d GetCoordinates() const;
     Vector4d GetHomogeneousCoordinates() const;
-    template <typename T, typename F>
-    Point& operator=(const Eigen::Product<T, F>& evaluable) {
+    template <typename T>
+    Point &operator=(const T &evaluable) {
         return *this = evaluable.eval();
     }
-    Point& operator=(const Vector3d&);
-    Point& operator=(const Vector4d&);
+    Point &operator=(const Vector3d &);
+    Point &operator=(const Vector4d &);
 
 private:
     Vector3d data_;

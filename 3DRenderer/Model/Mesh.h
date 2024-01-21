@@ -1,9 +1,8 @@
 #pragma once
-
-#include <Eigen/Dense>
-#include <vector>
 #include "Primitives.h"
 #include "Vertex.h"
+#include <Eigen/Dense>
+#include <vector>
 namespace renderer {
 class Mesh {
     using VerticesConstIterator = decltype(std::declval<const std::vector<Vertex>>().begin());
@@ -14,7 +13,7 @@ public:
 
     Iterable<TrianglesConstIterator> GetTrianglesIterable() const;
 
-    std::array<Vertex, 3> GetTriangleVertices(const Triangle&) const;
+    std::array<Vertex, 3> GetTriangleVertices(const Triangle &) const;
 
 private:
     std::vector<Vertex> vertices_;

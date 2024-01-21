@@ -1,11 +1,15 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include "Eigen/src/Core/Matrix.h"
+#include "Eigen/src/Geometry/Quaternion.h"
 #include "World.h"
 #include "Screen.h"
 namespace renderer {
 class Renderer {
     using Matrix4d = Eigen::Matrix4d;
+    using Quaterniond = Eigen::Quaterniond;
+    using Vector3d = Eigen::Vector3d;
 
 public:
     Renderer();

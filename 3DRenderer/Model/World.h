@@ -7,8 +7,10 @@
 namespace renderer {
 class World {
 public:
+    using Vector3d = Eigen::Vector3d;
+    using Vector4d = Eigen::Vector4d;
+    using Quaterniond = Eigen::Quaterniond;
     auto GetObjectsIterable() const {
-
         return Iterable(objects_.begin(), objects_.end());
     };
 
@@ -24,7 +26,7 @@ public:
 
     class CameraHolder : public Camera {
     public:
-        CameraHolder(const Camera &);
+        CameraHolder(Camera);
         const Vector3d &GetCoordinates() const;
         const Quaterniond &GetAngle() const;
 
@@ -38,6 +40,7 @@ public:
 
     class ObjectHolder : public AnyObject {
     public:
+        ObjectHolder(AnyObject &&, const Vector3d &, const Quaterniond &);
         ObjectHolder(const AnyObject &);
         ObjectHolder(AnyObject &&) noexcept;
         const Vector3d &GetCoordinates() const;
@@ -52,8 +55,9 @@ public:
         Eigen::Quaterniond rotation_;
     };
 
-private:
     static Vector3d GetOrigin();
+
+private:
     std::vector<ObjectHolder> objects_;
     std::vector<CameraHolder> cameras_;
     size_t current_camera_ind_;

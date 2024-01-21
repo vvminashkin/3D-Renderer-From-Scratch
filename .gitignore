@@ -36,3 +36,6 @@ build*
 
 .idea
 .idea*
+compile_commands.json
+tags
+.cache

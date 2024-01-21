@@ -3,7 +3,6 @@ double renderer::RGB::GetR() const {
     return val_(0);
 }
 void renderer::RGB::SetR(double val) {
-
     val_(0) = val;
 }
 double renderer::RGB::GetG() const {

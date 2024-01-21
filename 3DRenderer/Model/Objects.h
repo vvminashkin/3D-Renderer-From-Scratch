@@ -7,6 +7,7 @@
 namespace renderer {
 class RGB {
 public:
+    using Vector3d = Eigen::Vector3d;
     double GetR() const;
     void SetR(double);
     double GetG() const;
@@ -59,9 +60,11 @@ public:
     public:
         virtual ~InnerBase() = default;
 
-        virtual std::unique_ptr<InnerBase> Clone() const = 0;
-
         virtual const Mesh &GetMesh() const = 0;
+        friend class AnyObject;
+
+    private:
+        virtual std::unique_ptr<InnerBase> Clone() const = 0;
     };
 
 private:
@@ -73,15 +76,14 @@ private:
         Inner(T &&value) : value_(std::forward<T>(value)) {
         }
 
-        std::unique_ptr<InnerBase> Clone() const override {
-            return std::make_unique<Inner>(value_);
-        }
-
         const Mesh &GetMesh() const override {
             return value_.GetMesh();
         }
 
     private:
+        std::unique_ptr<InnerBase> Clone() const override {
+            return std::make_unique<Inner>(value_);
+        }
         T value_;
     };
 
