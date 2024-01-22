@@ -5,7 +5,7 @@
 #include <vector>
 namespace renderer {
 class Mesh {
-    using VerticesConstIterator = decltype(std::declval<const std::vector<Vertex>>().begin());
+    using VerticesConstIterator = decltype(std::declval<const std::vector<Vertex>>().begin()); // TODO 
     using TrianglesConstIterator = decltype(std::declval<const std::vector<Triangle>>().begin());
 
 public:

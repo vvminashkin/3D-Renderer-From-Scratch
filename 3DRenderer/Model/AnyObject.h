@@ -3,32 +3,7 @@
 #include <Eigen/Dense>
 #include <memory>
 #include "Mesh.h"
-#include <QtCore>
 namespace renderer {
-class RGB {
-public:
-    using Vector3d = Eigen::Vector3d;
-    double GetR() const;
-    void SetR(double);
-    double GetG() const;
-    void SetG(double);
-    double GetB() const;
-    void SetB(double);
-
-protected:
-    // r,g,b
-    Vector3d val_;
-};
-
-class BasicObject {
-public:
-    const Mesh &GetMesh() const {
-        return mesh_;
-    }
-
-private:
-    Mesh mesh_;
-};
 
 // Object for potential polymorphic use cases
 class AnyObject {
@@ -71,7 +46,7 @@ private:
     template <typename T>
     class Inner : public InnerBase {
     public:
-        Inner(const std::remove_reference_t<T> &value) : value_(value) {
+        Inner(const T &value) : value_(value) {
         }
         Inner(T &&value) : value_(std::forward<T>(value)) {
         }

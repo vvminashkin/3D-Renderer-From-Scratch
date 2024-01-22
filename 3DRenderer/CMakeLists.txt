@@ -5,7 +5,7 @@ set_source_files_properties(tags PROPERTIES GENERATED true)
 add_custom_command(OUTPUT tags
         COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-add_executable(${PROJECT_NAME} main.cpp Model/Objects.cpp
+add_executable(${PROJECT_NAME} main.cpp Model/AnyObject.cpp
         Model/Mesh.cpp
         Model/Vertex.cpp
         Model/Primitives.cpp
@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME} main.cpp Model/Objects.cpp
         Model/Renderer.cpp
         Model/Screen.cpp
         Model/Utils.cpp
+        Model/Object.cpp
         tags
 )
 #set(${CMAKE_PREFIX_PATH} ~/)

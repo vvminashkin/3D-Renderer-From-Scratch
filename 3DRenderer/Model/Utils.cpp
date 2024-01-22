@@ -1,5 +1,23 @@
 #include "Utils.h"
 namespace renderer {
+double renderer::RGB::GetR() const {
+    return val_(0);
+}
+void renderer::RGB::SetR(double val) {
+    val_(0) = val;
+}
+double renderer::RGB::GetG() const {
+    return val_(1);
+}
+void renderer::RGB::SetG(double val) {
+    val_(1) = val;
+}
+double renderer::RGB::GetB() const {
+    return val_(2);
+}
+void renderer::RGB::SetB(double val) {
+    val_(2) = val;
+}
 Point::Vector3d renderer::Point::GetCoordinates() const {
     return data_;
 }
@@ -8,7 +26,6 @@ Point& Point::operator=(const Vector3d& coordinates) {
     return *this;
 }
 Point::Vector4d Point::GetHomogeneousCoordinates() const {
-
     Vector4d ans;
     ans.topLeftCorner<3, 1>() = data_;
     ans(3) = 1;
@@ -37,9 +54,9 @@ Direction& Direction::operator=(const Vector4d& h_coordinates) {
 }
 Direction::Direction(const Vector3d& vec) : data_(vec) {
 }
-Direction::Direction(const Vector4d& vec) : data_(vec) {
+Direction::Direction(const Vector4d& vec) : data_(vec.topLeftCorner<3,1>()) {
 }
-Point::Point(const Vector4d& vec) : data_(vec) {
+Point::Point(const Vector4d& vec) : data_(vec.topLeftCorner<3,1>()) {
 }
 Point::Point(const Vector3d& vec) : data_(vec) {
 }

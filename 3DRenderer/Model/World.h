@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "Objects.h"
+#include "AnyObject.h"
 #include "Camera.h"
 
 namespace renderer {

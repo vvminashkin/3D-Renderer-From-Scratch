@@ -41,7 +41,7 @@ void World::CameraHolder::SetAngle(const Quaterniond &angle) {
 
 World::ObjectHolder::ObjectHolder(AnyObject &&obj, const Vector3d &coord,
                                   const Quaterniond &rotation)
-    : AnyObject(obj), coordinates_(coord), rotation_(rotation) {
+    : AnyObject(std::move(obj)), coordinates_(coord), rotation_(rotation) {
 }
 World::ObjectHolder::ObjectHolder(const AnyObject &obj) : AnyObject(obj) {
 }

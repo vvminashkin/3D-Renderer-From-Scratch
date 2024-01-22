@@ -1,6 +1,20 @@
 #pragma once
 #include "Eigen/Dense"
 namespace renderer {
+class RGB {
+public:
+    using Vector3d = Eigen::Vector3d;
+    double GetR() const;
+    void SetR(double);
+    double GetG() const;
+    void SetG(double);
+    double GetB() const;
+    void SetB(double);
+
+private:
+    // r,g,b
+    Vector3d val_;
+};
 template <typename Iterator>
 class Iterable {
 public:

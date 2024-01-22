@@ -11,20 +11,6 @@ Screen Renderer::Draw(const World &world, size_t width, size_t height) {
     return screen;
 }
 
-void Renderer::DrawTriangle(const Triangle &current, const World::ObjectHolder &owner_object,
-                            const World &world, Screen &screen) {
-
-    std::array<Vertex, 3> vertices = owner_object->GetMesh().GetTriangleVertices(current);
-
-    ShiftTriangleCoordinates(owner_object, &vertices);
-
-    ShiftTriangleToAlignCamera(world, &vertices);
-
-    world.GetCamera().ApplyPerspectiveTransformation(&vertices);
-
-    // TODO: rasterize triangle
-}
-
 void Renderer::ShiftTriangleCoordinates(const World::ObjectHolder &owner,
                                         std::array<Vertex, 3> *vertices) {
     assert(vertices != nullptr);
@@ -41,17 +27,18 @@ void Renderer::ShiftTriangleToAlignCamera(const World &world, std::array<Vertex,
     Renderer::ApplyHomogeneousTransformationMatrix(transformation_matrix, &(*vertices));
 }
 
-void Renderer::ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d &transformation_matrix,
-                                                    std::array<Vertex, 3> *vertices) {
-    assert(vertices != nullptr);
+void Renderer::DrawTriangle(const Triangle &current, const World::ObjectHolder &owner_object,
+                            const World &world, Screen &screen) {
 
-    // Page 76 "Mathematics for 3D game..."
-    for (auto &ver : *vertices) {
-        ver.coordinates = transformation_matrix * ver.coordinates.GetHomogeneousCoordinates();
-        ver.normal = transformation_matrix * ver.normal.GetHomogeneousCoordinates();
-    }
-}
-Renderer::Renderer() {
+    std::array<Vertex, 3> vertices = owner_object->GetMesh().GetTriangleVertices(current);
+
+    ShiftTriangleCoordinates(owner_object, &vertices);
+
+    ShiftTriangleToAlignCamera(world, &vertices);
+
+    world.GetCamera().ApplyPerspectiveTransformation(&vertices);
+
+    // TODO: rasterize triangle
 }
 Renderer::Matrix4d Renderer::MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
                                                                  const Vector3d &offset) {
@@ -61,5 +48,15 @@ Renderer::Matrix4d Renderer::MakeHomogeneousTransformationMatrix(const Quaternio
     transformation_matrix(3, 3) = 1;
     transformation_matrix.col(3).topLeftCorner<3, 1>() = offset;
     return transformation_matrix;
+}
+void Renderer::ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d &transformation_matrix,
+                                                    std::array<Vertex, 3> *vertices) {
+    assert(vertices != nullptr);
+
+    // Page 76 "Mathematics for 3D game..."
+    for (auto &ver : *vertices) {
+        ver.coordinates = transformation_matrix * ver.coordinates.GetHomogeneousCoordinates();
+        ver.normal = transformation_matrix * ver.normal.GetHomogeneousCoordinates();
+    }
 }
 }  // namespace renderer

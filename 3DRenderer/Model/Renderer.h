@@ -12,7 +12,7 @@ class Renderer {
     using Vector3d = Eigen::Vector3d;
 
 public:
-    Renderer();
+    Renderer() = default;
 
     Screen Draw(const World &world, size_t width, size_t height);
 
