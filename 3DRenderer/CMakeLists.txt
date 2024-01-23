@@ -15,6 +15,10 @@ add_executable(${PROJECT_NAME} main.cpp Model/AnyObject.cpp
         Model/Screen.cpp
         Model/Utils.cpp
         Model/Object.cpp
+        Model/Model.cpp
+        View/View.cpp
+        Controller/Controller.cpp
+        Application.cpp
         tags
 )
 #set(${CMAKE_PREFIX_PATH} ~/)
