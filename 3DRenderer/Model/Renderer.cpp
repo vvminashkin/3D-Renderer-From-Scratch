@@ -4,7 +4,7 @@ namespace renderer {
 Screen Renderer::Draw(const World &world, size_t width, size_t height) {
     Screen screen(width, height);
     for (const auto &object : world.GetObjectsIterable()) {
-        for (const auto &triangle : object->GetMesh().GetTrianglesIterable()) {
+        for (const auto &triangle : object->GetMesh().GetTriangles()) {
             DrawTriangle(triangle, object, world, screen);
         }
     }

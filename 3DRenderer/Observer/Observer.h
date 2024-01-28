@@ -4,7 +4,7 @@
 #include <list>
 #include <optional>
 #include <type_traits>
-
+namespace observer {
 template <class TData>
 bool constexpr isArithmetic = std::is_arithmetic_v<TData>;  // NOLINT
 
@@ -324,7 +324,6 @@ inline void CObserver<void, void>::unsubscribe() {
     Observable_ = nullptr;
 }
 
-
 template <class TData>
 class CStorage {
     using CData = TData;
@@ -368,10 +367,8 @@ public:
     }
 };
 
-
 template <class TData, class TSendBy, template <class T1, class T2> class TObservable>
-class CObservableDataImpl : protected CStorage<TData>,
-                            public TObservable<TData, TSendBy> {
+class CObservableDataImpl : protected CStorage<TData>, public TObservable<TData, TSendBy> {
     using CStorageBase = CStorage<TData>;
     using CObservableBase = TObservable<TData, TSendBy>;
 
@@ -428,3 +425,4 @@ public:
         : CBase(CBase::doNothing, std::forward<T>(Action), CBase::doNothing) {
     }
 };
+}  // namespace observer

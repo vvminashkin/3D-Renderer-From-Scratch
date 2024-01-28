@@ -5,13 +5,13 @@
 #include <vector>
 namespace renderer {
 class Mesh {
-    using VerticesConstIterator = decltype(std::declval<const std::vector<Vertex>>().begin()); // TODO 
-    using TrianglesConstIterator = decltype(std::declval<const std::vector<Triangle>>().begin());
+    using VerticesConstIterator = std::vector<Vertex>::const_iterator;
+    using TrianglesConstIterator = std::vector<Triangle>::const_iterator;
 
 public:
-    Iterable<VerticesConstIterator> GetVerticesIterable() const;
+    Iterable<VerticesConstIterator> GetVertices() const;
 
-    Iterable<TrianglesConstIterator> GetTrianglesIterable() const;
+    Iterable<TrianglesConstIterator> GetTriangles() const;
 
     std::array<Vertex, 3> GetTriangleVertices(const Triangle &) const;
 
