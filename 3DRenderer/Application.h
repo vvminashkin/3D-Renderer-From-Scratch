@@ -10,5 +10,7 @@ public:
     void Run();
 
 private:
+    static constexpr int GetWidth();
+    static constexpr int GetHeight();
 };
 }  // namespace application

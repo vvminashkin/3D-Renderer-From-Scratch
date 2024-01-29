@@ -1,11 +1,27 @@
 #include "Controller.h"
+#include <SFML/Window/Keyboard.hpp>
 #include <memory>
 namespace controller {
-Controller::Controller()
-    : update_listener_(
-          []() {}, [this](std::shared_ptr<const renderer::Screen> screen) { DrawPicture(screen); },
-          []() {}){};
-Controller::RecievePortType* Controller::GetRecievePort() {
-    return &update_listener_;
+Controller::Controller() {
+}
+
+bool Controller::HandleEvent(const sf::Event& event, model::Model& model) {
+    switch (event.type) {
+        case sf::Event::Closed:
+            return true;
+        case sf::Event::KeyPressed:
+            switch (event.key.code) {
+
+                case sf::Keyboard::A:
+                    model.TestUpdate();
+                    break;
+                default:
+                    break;
+            }
+            break;
+        default:
+            break;
+    }
+    return false;
 }
 }  // namespace controller

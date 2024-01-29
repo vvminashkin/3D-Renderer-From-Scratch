@@ -1,15 +1,8 @@
 #include "Application.h"
 #include "Controller/Controller.h"
 #include <iostream>
-
-void application::Application::Run() {
-    model::Model model;
-    view::View view;
-    controller::Controller controller;
-    model.Subscribe(controller.GetRecievePort());
-}
-
-void application::HandleException() {
+namespace application {
+void HandleException() {
 
     try {
         throw;
@@ -20,3 +13,27 @@ void application::HandleException() {
         std::cerr << "Application failed with unknown exception";
     }
 }
+void Application::Run() {
+    model::Model model(Application::GetWidth(), Application::GetHeight());
+    view::View view(Application::GetWidth(), Application::GetHeight());
+    controller::Controller controller;
+    model.Subscribe(view.GetRecievePort());
+    bool closed = false;
+    while (true) {
+        sf::Event event;
+        while (view.GetEvent(event)) {
+            closed = controller.HandleEvent(event, model);
+        }
+        if (closed) {
+            break;
+        }
+    }
+}
+
+constexpr int Application::GetWidth() {
+    return 500;
+}
+constexpr int Application::GetHeight() {
+    return 500;
+}
+}  // namespace application

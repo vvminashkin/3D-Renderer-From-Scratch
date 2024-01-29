@@ -1,9 +1,12 @@
 #pragma once
 #include "Eigen/Dense"
+#include <initializer_list>
 namespace renderer {
 class RGB {
 public:
     using Vector3d = Eigen::Vector3d;
+    RGB(const std::initializer_list<double> &);
+    RGB();
     double GetR() const;
     void SetR(double);
     double GetG() const;

@@ -1,5 +1,13 @@
 #include "Utils.h"
 namespace renderer {
+RGB::RGB(const std::initializer_list<double>& init) {
+    size_t i = 0;
+    for (double num : init) {
+        assert(i != 3);
+        val_[i] = num;
+        ++i;
+    }
+}
 double renderer::RGB::GetR() const {
     return val_(0);
 }
@@ -17,6 +25,8 @@ double renderer::RGB::GetB() const {
 }
 void renderer::RGB::SetB(double val) {
     val_(2) = val;
+}
+RGB::RGB() : val_(Vector3d::Zero()) {
 }
 Point::Vector3d renderer::Point::GetCoordinates() const {
     return data_;
@@ -54,9 +64,9 @@ Direction& Direction::operator=(const Vector4d& h_coordinates) {
 }
 Direction::Direction(const Vector3d& vec) : data_(vec) {
 }
-Direction::Direction(const Vector4d& vec) : data_(vec.topLeftCorner<3,1>()) {
+Direction::Direction(const Vector4d& vec) : data_(vec.topLeftCorner<3, 1>()) {
 }
-Point::Point(const Vector4d& vec) : data_(vec.topLeftCorner<3,1>()) {
+Point::Point(const Vector4d& vec) : data_(vec.topLeftCorner<3, 1>()) {
 }
 Point::Point(const Vector3d& vec) : data_(vec) {
 }

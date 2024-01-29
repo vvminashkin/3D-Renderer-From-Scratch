@@ -4,22 +4,28 @@
 #include <list>
 #include <optional>
 #include <type_traits>
+
 namespace observer {
-template <class TData>
-bool constexpr isArithmetic = std::is_arithmetic_v<TData>;  // NOLINT
+
+namespace NSObserverDetail {
 
 template <class TData>
-bool constexpr isPointer = std::is_pointer_v<TData>;  // NOLINT
+bool constexpr isArithmetic = std::is_arithmetic_v<TData>;
 
 template <class TData>
-bool constexpr isEnum = std::is_enum_v<TData>;  // NOLINT
+bool constexpr isPointer = std::is_pointer_v<TData>;
 
 template <class TData>
-bool constexpr isSimpleClass =  // NOLINT
-    isArithmetic<TData> || isPointer<TData> || isEnum<TData>;
+bool constexpr isEnum = std::is_enum_v<TData>;
+
+template <class TData>
+bool constexpr isSimpleClass = isArithmetic<TData> || isPointer<TData> || isEnum<TData>;
+}  // namespace NSObserverDetail
 
 struct CByValue;
 struct CByReference;
+
+namespace NSObserverDetail {
 
 template <class TData, class TSendBy>
 struct CDataSentByImpl;
@@ -70,30 +76,32 @@ struct CStoreWrapperImpl<TData, CByReference> {
 template <class TData, class TSendBy>
 using CStoreWrapper = typename CStoreWrapperImpl<TData, TSendBy>::CType;
 
+}  // namespace NSObserverDetail
+
 template <class TData, class TSendBy>
 class CObserver;
 
 template <class TData, class TSendBy>
 class CObservable;
 
-template <class TData, class TSendBy = AutoSendBy<TData>>
+template <class TData, class TSendBy = NSObserverDetail::AutoSendBy<TData>>
 class CObserver {
     using CData = TData;
     using CSendBy = TSendBy;
 
-    using CObservable = CObservable<CData, CSendBy>;
+    using CObservable1 = CObservable<CData, CSendBy>;
 
-    using CDataSentBy = CDataSentBy<CData, CSendBy>;
+    using CDataSentBy = NSObserverDetail::CDataSentBy<CData, CSendBy>;
     using CSignature = void(CDataSentBy);
     using CAction = std::function<CSignature>;
 
-    friend CObservable;
+    friend CObservable1;
 
 public:
     using CArg = CDataSentBy;
 
     template <class T1, class T2, class T3>
-    CObserver(T1&& onSubscribe, T2&& onNotify, T3&& onUnsubscribe)  // NOLINT
+    CObserver(T1&& onSubscribe, T2&& onNotify, T3&& onUnsubscribe)
         : onSubscribe_(std::forward<T1>(onSubscribe)),
           onNotify_(std::forward<T2>(onNotify)),
           onUnsubscribe_(std::forward<T3>(onUnsubscribe)) {
@@ -108,52 +116,52 @@ public:
     ~CObserver() {
         unsubscribe();
     }
-    void unsubscribe();          // NOLINT
-    bool isSubscribed() const {  // NOLINT
+    void unsubscribe();
+    bool isSubscribed() const {
         return Observable_ != nullptr;
     }
-    bool hasData() const;                 // NOLINT
-    CDataSentBy data() const;             // NOLINT
-    static void doNothing(CDataSentBy) {  // NOLINT
+    bool hasData() const;
+    CDataSentBy data() const;
+    static void doNothing(CDataSentBy) {
     }
 
 private:
-    void setObservable(CObservable* observable) {  // NOLINT
+    void setObservable(CObservable1* observable) {
         assert(observable);
         Observable_ = observable;
     }
 
-    CObservable* Observable_ = nullptr;  // NOLINT
-    CAction onSubscribe_;                // NOLINT
-    CAction onNotify_;                   // NOLINT
-    CAction onUnsubscribe_;              // NOLINT
+    CObservable1* Observable_ = nullptr;
+    CAction onSubscribe_;
+    CAction onNotify_;
+    CAction onUnsubscribe_;
 };
 
-template <class TData, class TSendBy = AutoSendBy<TData>>  // NOLINT
+template <class TData, class TSendBy = NSObserverDetail::AutoSendBy<TData>>
 class CObservable {
     using CData = TData;
     using CSendBy = TSendBy;
 
-    using CObserver = CObserver<CData, CSendBy>;
-    using CObserversContainer = std::list<CObserver*>;
+    using CObserver1 = CObserver<CData, CSendBy>;
+    using CObserversContainer = std::list<CObserver1*>;
 
-    using CDataSentBy = CDataSentBy<CData, CSendBy>;
-    using CStoreWrapper = CStoreWrapper<CData, CSendBy>;
+    using CDataSentBy = NSObserverDetail::CDataSentBy<CData, CSendBy>;
+    using CStoreWrapper = NSObserverDetail::CStoreWrapper<CData, CSendBy>;
 
     using CStoredData = std::optional<CStoreWrapper>;
     using CSignature = CStoredData();
     using CGetAction = std::function<CSignature>;
 
-    using CListeners = std::list<CObserver*>;
+    using CListeners = std::list<CObserver1*>;
 
-    friend CObserver;
+    friend CObserver1;
 
 public:
     using CGetType = CStoredData;
     using CReturn = CDataSentBy;
 
     template <class TF>
-    CObservable(TF&& Data) : Data_(std::forward<TF>(Data)) {  // NOLINT
+    CObservable(TF&& Data) : Data_(std::forward<TF>(Data)) {
         assert(Data_);
     }
     CObservable(const CObservable&) = delete;
@@ -163,44 +171,44 @@ public:
     ~CObservable() {
         unsubscribeAll();
     }
-    void notify() const {                  // NOLINT
-        CStoredData Data = Data_();        // NOLINT
-        if (!Data.has_value())             // NOLINT
-            return;                        // NOLINT
-        for (CObserver* obs : Listeners_)  // NOLINT
-            obs->onNotify_(*Data);         // NOLINT
+    void notify() const {
+        CStoredData Data = Data_();
+        if (!Data.has_value())
+            return;
+        for (CObserver1* obs : Listeners_)
+            obs->onNotify_(*Data);
     }
-    void subscribe(CObserver* obs) {  // NOLINT
+    void subscribe(CObserver1* obs) {
         assert(obs);
-        if (obs->isSubscribed())  // NOLINT
-            obs->unsubscribe();   // NOLINT
+        if (obs->isSubscribed())
+            obs->unsubscribe();
         Listeners_.push_back(obs);
         obs->setObservable(this);
-        CStoredData Data = Data_();               // NOLINT
-        if (Data.has_value())                     // NOLINT
-            obs->onSubscribe_(std::move(*Data));  // NOLINT
+        CStoredData Data = Data_();
+        if (Data.has_value())
+            obs->onSubscribe_(std::move(*Data));
     }
-    void unsubscribeAll() {                     // NOLINT
-        while (!Listeners_.empty())             // NOLINT
-            Listeners_.front()->unsubscribe();  // NOLINT
+    void unsubscribeAll() {
+        while (!Listeners_.empty())
+            Listeners_.front()->unsubscribe();
     }
 
 private:
-    void detach_(CObserver* obs) {  // NOLINT
+    void detach_(CObserver1* obs) {
         assert(obs);
-        CStoredData Data = Data_();                 // NOLINT
-        if (Data.has_value())                       // NOLINT
-            obs->onUnsubscribe_(std::move(*Data));  // NOLINT
-        Listeners_.remove(obs);                     // NOLINT
+        CStoredData Data = Data_();
+        if (Data.has_value())
+            obs->onUnsubscribe_(std::move(*Data));
+        Listeners_.remove(obs);
     }
-    CGetAction Data_;       // NOLINT
-    CListeners Listeners_;  // NOLINT
+    CGetAction Data_;
+    CListeners Listeners_;
 };
 
 template <class TData, class TSendBy>
 void CObserver<TData, TSendBy>::unsubscribe() {
-    if (!isSubscribed())  // NOLINT
-        return;           // NOLINT
+    if (!isSubscribed())
+        return;
     Observable_->detach_(this);
     Observable_ = nullptr;
 }
@@ -221,18 +229,18 @@ class CObserver<void, void> {
     using CData = void;
     using CSendBy = void;
 
-    using CObservable = CObservable<CData, CSendBy>;
+    using CObservable1 = CObservable<CData, CSendBy>;
 
     using CSignature = void();
     using CAction = std::function<CSignature>;
 
-    friend CObservable;
+    friend CObservable1;
 
 public:
     using CArg = void;
 
     template <class T1, class T2, class T3>
-    CObserver(T1&& onSubscribe, T2&& onNotify, T3&& onUnsubscribe)  // NOLINT
+    CObserver(T1&& onSubscribe, T2&& onNotify, T3&& onUnsubscribe)
         : onSubscribe_(std::forward<T1>(onSubscribe)),
           onNotify_(std::forward<T2>(onNotify)),
           onUnsubscribe_(std::forward<T3>(onUnsubscribe)) {
@@ -247,24 +255,24 @@ public:
     ~CObserver() {
         unsubscribe();
     }
-    void unsubscribe();          // NOLINT
-    bool isSubscribed() const {  // NOLINT
+    void unsubscribe();
+    bool isSubscribed() const {
         return Observable_ != nullptr;
     }
 
-    static void doNothing() {  // NOLINT
+    static void doNothing() {
     }
 
 private:
-    void setObservable(CObservable* observable) {  // NOLINT
+    void setObservable(CObservable1* observable) {
         assert(observable);
         Observable_ = observable;
     }
 
-    CObservable* Observable_ = nullptr;  // NOLINT
-    CAction onSubscribe_;                // NOLINT
-    CAction onNotify_;                   // NOLINT
-    CAction onUnsubscribe_;              // NOLINT
+    CObservable1* Observable_ = nullptr;
+    CAction onSubscribe_;
+    CAction onNotify_;
+    CAction onUnsubscribe_;
 };
 
 template <>
@@ -272,13 +280,13 @@ class CObservable<void, void> {
     using CData = void;
     using CSendBy = void;
 
-    using CObserver = CObserver<CData, CSendBy>;
-    using CObserversContainer = std::list<CObserver*>;
+    using CObserver1 = CObserver<CData, CSendBy>;
+    using CObserversContainer = std::list<CObserver1*>;
 
     using CDataSentBy = void;
-    using CListeners = std::list<CObserver*>;
+    using CListeners = std::list<CObserver1*>;
 
-    friend CObserver;
+    friend CObserver1;
 
 public:
     using CReturn = CDataSentBy;
@@ -291,38 +299,40 @@ public:
     ~CObservable() {
         unsubscribeAll();
     }
-    void notify() const {                  // NOLINT
-        for (CObserver* obs : Listeners_)  // NOLINT
-            obs->onNotify_();              // NOLINT
+    void notify() const {
+        for (CObserver1* obs : Listeners_)
+            obs->onNotify_();
     }
-    void subscribe(CObserver* obs) {  // NOLINT
+    void subscribe(CObserver1* obs) {
         assert(obs);
-        if (obs->isSubscribed())  // NOLINT
-            obs->unsubscribe();   // NOLINT
+        if (obs->isSubscribed())
+            obs->unsubscribe();
         Listeners_.push_back(obs);
         obs->setObservable(this);
         obs->onSubscribe_();
     }
-    void unsubscribeAll() {                     // NOLINT
-        while (!Listeners_.empty())             // NOLINT
-            Listeners_.front()->unsubscribe();  // NOLINT
+    void unsubscribeAll() {
+        while (!Listeners_.empty())
+            Listeners_.front()->unsubscribe();
     }
 
 private:
-    void detach_(CObserver* obs) {  // NOLINT
+    void detach_(CObserver1* obs) {
         assert(obs);
         obs->onUnsubscribe_();
         Listeners_.remove(obs);
     }
-    CListeners Listeners_;  // NOLINT
+    CListeners Listeners_;
 };
 
 inline void CObserver<void, void>::unsubscribe() {
-    if (!isSubscribed())  // NOLINT
+    if (!isSubscribed())
         return;
     Observable_->detach_(this);
     Observable_ = nullptr;
 }
+
+namespace NSObserverDetail {
 
 template <class TData>
 class CStorage {
@@ -336,21 +346,22 @@ public:
 
 protected:
     template <class... TArgs>
-    void set(TArgs&&... args) {  // NOLINT
+    void set(TArgs&&... args) {
         Data_.emplace(std::forward<TArgs>(args)...);
     }
 
     CStoredData Data_{};
 };
+}  // namespace NSObserverDetail
 
-template <class TData, class TSendBy = AutoSendBy<TData>>
+template <class TData, class TSendBy = NSObserverDetail::AutoSendBy<TData>>
 class CObservableMono : protected CObservable<TData, TSendBy> {
     using CData = TData;
     using CSendBy = TSendBy;
 
     using CBase = CObservable<CData, CSendBy>;
 
-    using CObserver = CObserver<CData, CSendBy>;
+    using CObserver1 = CObserver<CData, CSendBy>;
 
 public:
     using CBase::CGetType;
@@ -361,68 +372,72 @@ public:
     using CBase::notify;
     using CBase::unsubscribeAll;
 
-    void subscribe(CObserver* obs) {  // NOLINT
+    void subscribe(CObserver1* obs) {
         CBase::unsubscribeAll();
         CBase::subscribe(obs);
     }
 };
 
+namespace NSObserverDetail {
+
 template <class TData, class TSendBy, template <class T1, class T2> class TObservable>
-class CObservableDataImpl : protected CStorage<TData>, public TObservable<TData, TSendBy> {
-    using CStorageBase = CStorage<TData>;
+class CObservableDataImpl : protected NSObserverDetail::CStorage<TData>,
+                            public TObservable<TData, TSendBy> {
+    using CStorageBase = NSObserverDetail::CStorage<TData>;
     using CObservableBase = TObservable<TData, TSendBy>;
 
 public:
     template <class... TArgs>
     explicit CObservableDataImpl(TArgs&&... args)
         : CStorageBase(std::forward<TArgs>(args)...),
-          CObservableBase([&Data = CStorageBase::Data_]() ->  // NOLINT
+          CObservableBase([&Data = CStorageBase::Data_]() ->
                           typename CObservableBase::CGetType { return Data; }) {
     }
 
     template <class... TArgs>
-    void set(TArgs&&... args) {  // NOLINT
+    void set(TArgs&&... args) {
         CStorageBase::set(std::forward<TArgs>(args)...);
         CObservableBase::notify();
     }
 };
+}  // namespace NSObserverDetail
 
-template <class TData, class TSendBy = AutoSendBy<TData>>  // NOLINT
-using CObservableData = CObservableDataImpl<TData, TSendBy, CObservable>;
+template <class TData, class TSendBy = NSObserverDetail::AutoSendBy<TData>>
+using CObservableData = NSObserverDetail::CObservableDataImpl<TData, TSendBy, CObservable>;
 
-template <class TData, class TSendBy = AutoSendBy<TData>>
-using CObservableDataMono = CObservableDataImpl<TData, TSendBy, CObservableMono>;
+template <class TData, class TSendBy = NSObserverDetail::AutoSendBy<TData>>
+using CObservableDataMono = NSObserverDetail::CObservableDataImpl<TData, TSendBy, CObservableMono>;
 
-template <class TData, class TSendBy = AutoSendBy<TData>>
+template <class TData, class TSendBy = NSObserverDetail::AutoSendBy<TData>>
 class CInput : public CObserver<TData, TSendBy> {
     using CBase = CObserver<TData, TSendBy>;
 
 public:
     template <class T1, class T2>
-    explicit CInput(T1&& OnSubscribe, T2&& OnNotify)  // NOLINT
+    explicit CInput(T1&& OnSubscribe, T2&& OnNotify)
         : CBase(std::forward<T1>(OnSubscribe), std::forward<T2>(OnNotify), CBase::doNothing) {
     }
 };
 
-template <class TData, class TSendBy = AutoSendBy<TData>>
+template <class TData, class TSendBy = NSObserverDetail::AutoSendBy<TData>>
 class CHotInput : public CObserver<TData, TSendBy> {
     using CBase = CObserver<TData, TSendBy>;
 
 public:
     template <class T>
-    explicit CHotInput(const T& Action)  // NOLINT
-        : CBase(Action, Action, CBase::doNothing) {
+    explicit CHotInput(const T& Action) : CBase(Action, Action, CBase::doNothing) {
     }
 };
 
-template <class TData, class TSendBy = AutoSendBy<TData>>  // NOLINT
+template <class TData, class TSendBy = NSObserverDetail::AutoSendBy<TData>>
 class CColdInput : public CObserver<TData, TSendBy> {
     using CBase = CObserver<TData, TSendBy>;
 
 public:
     template <class T>
-    explicit CColdInput(T&& Action)  // NOLINT
+    explicit CColdInput(T&& Action)
         : CBase(CBase::doNothing, std::forward<T>(Action), CBase::doNothing) {
     }
 };
+
 }  // namespace observer

@@ -1,7 +1,10 @@
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(Qt5 COMPONENTS Core REQUIRED)
+#find_package(SFML )
 set_source_files_properties(tags PROPERTIES GENERATED true)
+
+find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 add_custom_command(OUTPUT tags
         COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
@@ -21,8 +24,11 @@ add_executable(${PROJECT_NAME} main.cpp Model/AnyObject.cpp
         Application.cpp
         tags
 )
+target_link_libraries(${PROJECT_NAME} sfml-graphics )
+
 #set(${CMAKE_PREFIX_PATH} ~/)
 target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
 
-target_link_libraries(${PROJECT_NAME} Qt5::Core)
+#target_link_libraries(${PROJECT_NAME} Qt5::Core)
+
 # set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "main.out")
