@@ -8,9 +8,7 @@ void World::AddObject(AnyObject object) {
     objects_.back().SetAngle(Eigen::AngleAxis<double>(0, Eigen::Vector3d::UnitX()));
 }
 void World::AddObject(AnyObject object, const Eigen::Vector3d &global_coordinates) {
-    objects_.emplace_back(std::move(object));
-    objects_.back().SetCoordinates(global_coordinates);
-    objects_.back().SetAngle(Eigen::AngleAxis<double>(0, Eigen::Vector3d::UnitX()));
+    objects_.emplace_back(std::move(object), global_coordinates,Eigen::AngleAxis<double>(0, Eigen::Vector3d::UnitX()) );
 }
 World::Vector3d World::GetOrigin() {
     return {0, 0, 0};
