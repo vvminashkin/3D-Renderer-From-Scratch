@@ -18,7 +18,7 @@ void renderer::Camera::InitPerspective() {
 }
 Triangle Camera::ApplyPerspectiveTransformation(const Triangle& vertices) const {
     Triangle ans = vertices;
-    for (auto& i : ans.verticies_) {
+    for (auto& i : ans.GetVerticies()) {
         i.coordinates = perspective_matrix_ * i.coordinates.GetHomogeneousCoordinates();
     }
     return ans;

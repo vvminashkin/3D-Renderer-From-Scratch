@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "Primitives.h"
 
 namespace renderer {
 Screen Renderer::Draw(const World &world, size_t width, size_t height) {
@@ -35,10 +36,15 @@ void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectH
 
     ShiftTriangleToAlignCamera(world, &vertices);
 
-    Triangle camera_space_triangle = world.GetCamera().ApplyPerspectiveTransformation(vertices);
+    Triangle transformed_vertices = world.GetCamera().ApplyPerspectiveTransformation(vertices);
 
-    // TODO: rasterize triangle
+    BarycentricCoordinateSystem system(vertices, transformed_vertices);
+    //TODO: clip triangle
+    //for each clipped:
+    RasterizeTriangle(system, transformed_vertices, &screen);
 }
+void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &,
+                                 const Triangle &, Screen *) {}
 Renderer::Matrix4d Renderer::MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
                                                                  const Vector3d &offset) {
 
@@ -53,9 +59,9 @@ void Renderer::ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d &trans
     assert(vertices != nullptr);
 
     // Page 76 "Mathematics for 3D game..."
-    for (auto &ver : vertices->verticies_) {
+    for (auto &ver : vertices->GetVerticies()) {
         ver.coordinates = transformation_matrix * ver.coordinates.GetHomogeneousCoordinates();
         ver.normal = transformation_matrix * ver.normal.GetHomogeneousCoordinates();
     }
 }
-}  // namespace renderer
+} // namespace renderer

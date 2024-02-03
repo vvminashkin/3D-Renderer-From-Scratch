@@ -12,7 +12,7 @@ Triangle Mesh::GetTriangleVertices(const ITriangle &triangle) const {
 
     Triangle ans;
     for (size_t i = 0; i < 3; ++i) {
-        ans.verticies_[i] = vertices_[triangle.points_(i)];  // TODO get triangle
+        ans.GetVerticies()[i] = vertices_[triangle.points_(i)];  // TODO get triangle
     }
 
     return ans;

@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include "Eigen/src/Core/Matrix.h"
 #include "Eigen/src/Geometry/Quaternion.h"
+#include "Primitives.h"
 #include "World.h"
 #include "Screen.h"
 class Model;
@@ -24,6 +25,8 @@ private:
     void DrawTriangle(const Mesh::ITriangle &current, const World::ObjectHolder &owner_object,
                       const World &world, Screen &screen);
 
+    void RasterizeTriangle(const BarycentricCoordinateSystem &,
+                           const Triangle &, Screen *);
     static Matrix4d MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
                                                         const Vector3d &offset);
     static void ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d &, Triangle *);

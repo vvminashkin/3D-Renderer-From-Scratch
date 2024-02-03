@@ -5,7 +5,6 @@
 #include <vector>
 namespace renderer {
 class Mesh {
-
 public:
     using Vector3i = Eigen::Vector3i;
     struct ITriangle {

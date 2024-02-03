@@ -1,5 +1,6 @@
 #pragma once
 #include "Eigen/Dense"
+#include "Eigen/src/Core/Matrix.h"
 #include <initializer_list>
 namespace renderer {
 class RGB {

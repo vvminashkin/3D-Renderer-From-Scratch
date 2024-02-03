@@ -31,9 +31,9 @@ void Application::Run() {
 }
 
 constexpr int Application::GetWidth() {
-    return 500;
+    return 1500;
 }
 constexpr int Application::GetHeight() {
-    return 500;
+    return 1000;
 }
 }  // namespace application
