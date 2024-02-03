@@ -3,6 +3,7 @@
 #include <vector>
 #include "AnyObject.h"
 #include "Camera.h"
+#include "Eigen/src/Geometry/AngleAxis.h"
 
 namespace renderer {
 class World {
@@ -40,7 +41,7 @@ public:
 
     class ObjectHolder : public AnyObject {
     public:
-        ObjectHolder(AnyObject &&, const Vector3d &, const Quaterniond &);
+        ObjectHolder(AnyObject &&, const Vector3d &, const Eigen::AngleAxisd &);
         ObjectHolder(const AnyObject &);
         ObjectHolder(AnyObject &&) noexcept;
         const Vector3d &GetCoordinates() const;

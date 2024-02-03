@@ -8,7 +8,8 @@ void World::AddObject(AnyObject object) {
     objects_.back().SetAngle(Eigen::AngleAxis<double>(0, Eigen::Vector3d::UnitX()));
 }
 void World::AddObject(AnyObject object, const Eigen::Vector3d &global_coordinates) {
-    objects_.emplace_back(std::move(object), global_coordinates,Eigen::AngleAxis<double>(0, Eigen::Vector3d::UnitX()) );
+    objects_.emplace_back(std::move(object), global_coordinates,
+                          Eigen::AngleAxis<double>(0, Eigen::Vector3d::UnitX()));
 }
 World::Vector3d World::GetOrigin() {
     return {0, 0, 0};
@@ -38,7 +39,7 @@ void World::CameraHolder::SetAngle(const Quaterniond &angle) {
 }
 
 World::ObjectHolder::ObjectHolder(AnyObject &&obj, const Vector3d &coord,
-                                  const Quaterniond &rotation)
+                                  const Eigen::AngleAxisd &rotation)
     : AnyObject(std::move(obj)), coordinates_(coord), rotation_(rotation) {
 }
 World::ObjectHolder::ObjectHolder(const AnyObject &obj) : AnyObject(obj) {

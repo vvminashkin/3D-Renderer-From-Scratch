@@ -2,11 +2,12 @@
 
 #include <Eigen/Dense>
 #include "Vertex.h"
+#include "Primitives.h"
 #include <array>
 namespace renderer {
 class Camera {
 public:
-    void ApplyPerspectiveTransformation(std::array<Vertex, 3>*) const;
+    Triangle ApplyPerspectiveTransformation(const Triangle&) const;
 
 private:
     void InitPerspective();

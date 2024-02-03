@@ -8,11 +8,11 @@ Iterable<Mesh::TrianglesConstIterator> Mesh::GetTriangles() const {
 Iterable<Mesh::VerticesConstIterator> Mesh::GetVertices() const {
     return Iterable(vertices_.begin(), vertices_.end());
 }
-std::array<Vertex, 3> Mesh::GetTriangleVertices(const Triangle &triangle) const {
+Triangle Mesh::GetTriangleVertices(const ITriangle &triangle) const {
 
-    std::array<Vertex, 3> ans;
+    Triangle ans;
     for (size_t i = 0; i < 3; ++i) {
-        ans[i] = vertices_[triangle.GetPoints()(i)];  // TODO get triangle
+        ans.verticies_[i] = vertices_[triangle.points_(i)];  // TODO get triangle
     }
 
     return ans;
