@@ -26,7 +26,8 @@ private:
                       const World &world, Screen &screen);
 
     void RasterizeTriangle(const BarycentricCoordinateSystem &,
-                           const Triangle &, Screen *);
+                           const Eigen::Vector3<BarycentricCoordinateSystem::BCoordinates> &,
+                           Screen *);
     static Matrix4d MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
                                                         const Vector3d &offset);
     static void ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d &, Triangle *);

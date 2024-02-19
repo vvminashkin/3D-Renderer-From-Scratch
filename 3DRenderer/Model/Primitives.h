@@ -11,6 +11,7 @@ public:
     Vector3d CalculateCoordinatesFromBarycentric(const Vector3d &) const;
     Eigen::Vector3<Vertex> &GetVerticies();
     const Eigen::Vector3<Vertex> &GetVerticies() const;
+    Eigen::Vector3<Vector3d> GetVerticiesCoordinates() const;
 
 private:
     Eigen::Vector3<Vertex> verticies_;

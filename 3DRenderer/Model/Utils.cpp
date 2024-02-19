@@ -1,4 +1,5 @@
 #include "Utils.h"
+#include <cassert>
 namespace renderer {
 RGB::RGB(const std::initializer_list<double>& init) {
     size_t i = 0;
@@ -28,31 +29,9 @@ void renderer::RGB::SetB(double val) {
 }
 RGB::RGB() : val_(Vector3d::Zero()) {
 }
-Point::Vector3d renderer::Point::GetCoordinates() const {
-    return data_;
+Direction::Direction(const Vector3d& vec) : data_(vec) {
 }
-Point& Point::operator=(const Vector3d& coordinates) {
-    data_ = coordinates;
-    return *this;
-}
-Point::Vector4d Point::GetHomogeneousCoordinates() const {
-    Vector4d ans;
-    ans.topLeftCorner<3, 1>() = data_;
-    ans(3) = 1;
-    return ans;
-}
-Point& Point::operator=(const Vector4d& h_coordinates) {
-    data_ = h_coordinates.topLeftCorner<3, 1>();
-    return *this;
-}
-Direction::Vector3d Direction::GetCoordinates() const {
-    return data_;
-}
-Direction::Vector4d Direction::GetHomogeneousCoordinates() const {
-    Vector4d ans;
-    ans.topLeftCorner<3, 1>() = data_;
-    ans(3) = 0;
-    return ans;
+Direction::Direction(const Vector4d& vec) : data_(vec.topLeftCorner<3, 1>()) {
 }
 Direction& Direction::operator=(const Vector3d& coordinates) {
     data_ = coordinates;
@@ -62,12 +41,32 @@ Direction& Direction::operator=(const Vector4d& h_coordinates) {
     data_ = h_coordinates.topLeftCorner<3, 1>();
     return *this;
 }
-Direction::Direction(const Vector3d& vec) : data_(vec) {
+Direction::Vector3d Direction::GetCoordinates() const {
+    return data_;
 }
-Direction::Direction(const Vector4d& vec) : data_(vec.topLeftCorner<3, 1>()) {
+Direction::Vector4d Direction::GetHomogeneousCoordinates() const {
+    Vector4d ans;
+    ans.topLeftCorner<3, 1>() = data_;
+    ans.w() = 0;
+    return ans;
 }
-Point::Point(const Vector4d& vec) : data_(vec.topLeftCorner<3, 1>()) {
+Point::Point(const Vector4d& vec) : data_(vec) {
 }
-Point::Point(const Vector3d& vec) : data_(vec) {
+Point::Point(const Vector3d& vec) {
+    data_.topLeftCorner<3, 1>() = vec;
+}
+Point& Point::operator=(const Vector4d& h_coordinates) {
+    data_ = h_coordinates;
+    return *this;
+}
+Point& Point::operator=(const Vector3d& coordinates) {
+    data_ = coordinates;
+    return *this;
+}
+Point::Vector3d renderer::Point::GetCoordinates() const {
+    return data_.topLeftCorner<3, 1>();
+}
+Point::Vector4d Point::GetHomogeneousCoordinates() const {
+    return data_;
 }
 }  // namespace renderer

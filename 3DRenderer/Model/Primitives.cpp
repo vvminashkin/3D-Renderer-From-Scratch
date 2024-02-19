@@ -31,4 +31,11 @@ Eigen::Vector3<Vertex> &Triangle::GetVerticies() {
 const Eigen::Vector3<Vertex> &Triangle::GetVerticies() const {
     return verticies_;
 }
+Eigen::Vector3<Triangle::Vector3d> Triangle::GetVerticiesCoordinates() const {
+    Eigen::Vector3<Triangle::Vector3d> ans;
+    ans.x() = verticies_.x().coordinates.GetCoordinates();
+    ans.y() = verticies_.y().coordinates.GetCoordinates();
+    ans.z() = verticies_.z().coordinates.GetCoordinates();
+    return ans;
+}
 }  // namespace renderer

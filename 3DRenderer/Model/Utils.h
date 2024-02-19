@@ -58,7 +58,7 @@ public:
     Direction &operator=(const Vector4d &);
 
 private:
-    Vector3d data_;
+    Vector3d data_ = Vector3d::Zero();
 };
 
 class Point {
@@ -82,6 +82,6 @@ public:
     Point &operator=(const Vector4d &);
 
 private:
-    Vector3d data_;
+    Vector4d data_ = Vector4d::Ones();
 };
 }  // namespace renderer

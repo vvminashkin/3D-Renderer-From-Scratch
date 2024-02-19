@@ -39,3 +39,4 @@ build*
 compile_commands.json
 tags
 .cache
+release*

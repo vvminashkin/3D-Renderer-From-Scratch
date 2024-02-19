@@ -1,6 +1,6 @@
 #include "Renderer.h"
 #include "Primitives.h"
-
+#include <cassert>
 namespace renderer {
 Screen Renderer::Draw(const World &world, size_t width, size_t height) {
     Screen screen(width, height);
@@ -39,12 +39,14 @@ void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectH
     Triangle transformed_vertices = world.GetCamera().ApplyPerspectiveTransformation(vertices);
 
     BarycentricCoordinateSystem system(vertices, transformed_vertices);
-    //TODO: clip triangle
-    //for each clipped:
-    RasterizeTriangle(system, transformed_vertices, &screen);
+    // TODO: clip triangle
+    // for each clipped:
+    RasterizeTriangle(system, system.GetTriangle(), &screen);
 }
-void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &,
-                                 const Triangle &, Screen *) {}
+void Renderer::RasterizeTriangle(
+    const BarycentricCoordinateSystem &system,
+    const Eigen::Vector3<BarycentricCoordinateSystem::BCoordinates> &coordinates, Screen *) {
+}
 Renderer::Matrix4d Renderer::MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
                                                                  const Vector3d &offset) {
 
@@ -64,4 +66,4 @@ void Renderer::ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d &trans
         ver.normal = transformation_matrix * ver.normal.GetHomogeneousCoordinates();
     }
 }
-} // namespace renderer
+}  // namespace renderer
