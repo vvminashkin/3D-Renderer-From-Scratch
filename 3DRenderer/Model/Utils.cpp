@@ -66,7 +66,10 @@ Point& Point::operator=(const Vector3d& coordinates) {
 Point::Vector3d renderer::Point::GetCoordinates() const {
     return data_.topLeftCorner<3, 1>();
 }
-Point::Vector4d Point::GetHomogeneousCoordinates() const {
+const Point::Vector4d& Point::GetHomogeneousCoordinates() const {
     return data_;
+}
+double Point::w() {
+    return data_.w();
 }
 }  // namespace renderer

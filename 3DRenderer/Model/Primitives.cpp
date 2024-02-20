@@ -12,6 +12,12 @@ Triangle::Vector3d Triangle::CalculateCoordinatesFromBarycentric(
 BarycentricCoordinateSystem::BarycentricCoordinateSystem(const Triangle &original,
                                                          const Triangle &transformed)
     : original_(original), transformed_(transformed) {
+    for (int i = 0; i < 3; ++i) {
+        original_coordinates_matrix_.row(i) =
+            original_.GetVerticies()[i].coordinates.GetHomogeneousCoordinates();
+        transformed_coordinates_matrix_.row(i) =
+            transformed_.GetVerticies()[i].coordinates.GetHomogeneousCoordinates();
+    }
 }
 Eigen::Vector3<BarycentricCoordinateSystem::BCoordinates>
 BarycentricCoordinateSystem::GetTriangle() {
@@ -19,11 +25,11 @@ BarycentricCoordinateSystem::GetTriangle() {
 }
 BarycentricCoordinateSystem::Vector3d BarycentricCoordinateSystem::GetOriginalCoordinates(
     const BCoordinates &coordinates) const {
-    return original_.CalculateCoordinatesFromBarycentric(coordinates);
+    return original_coordinates_matrix_.topLeftCorner<3, 3>() * coordinates;
 }
 BarycentricCoordinateSystem::Vector3d BarycentricCoordinateSystem::GetTransformedCoordinates(
     const BCoordinates &coordinates) const {
-    return transformed_.CalculateCoordinatesFromBarycentric(coordinates);
+    return transformed_coordinates_matrix_.topLeftCorner<3, 3>() * coordinates;
 }
 Eigen::Vector3<Vertex> &Triangle::GetVerticies() {
     return verticies_;
@@ -37,5 +43,23 @@ Eigen::Vector3<Triangle::Vector3d> Triangle::GetVerticiesCoordinates() const {
     ans.y() = verticies_.y().coordinates.GetCoordinates();
     ans.z() = verticies_.z().coordinates.GetCoordinates();
     return ans;
+}
+Eigen::Vector3<Eigen::Vector3d> BarycentricCoordinateSystem::GetTransformedTriangleCoordinates(
+    const Eigen::Vector3<BarycentricCoordinateSystem::BCoordinates> &triangle) const {
+    Eigen::Vector3<Vector3d> ans;
+
+    return ans;
+}
+Eigen::Vector3<Eigen::Vector3d> BarycentricCoordinateSystem::GetTriangleCoordinates(
+    const Eigen::Vector3<BarycentricCoordinateSystem::BCoordinates> &triangle) const {
+    Eigen::Vector3<Vector3d> ans;
+    ans.x() = GetOriginalCoordinates(triangle.x());
+    ans.y() = GetOriginalCoordinates(triangle.y());
+    ans.z() = GetOriginalCoordinates(triangle.z());
+    return ans;
+}
+double BarycentricCoordinateSystem::InterpolateZCoordinate(
+    const BarycentricCoordinateSystem::BCoordinates &coordinates) {
+    return transformed_coordinates_matrix_.col(3).dot(coordinates);
 }
 }  // namespace renderer

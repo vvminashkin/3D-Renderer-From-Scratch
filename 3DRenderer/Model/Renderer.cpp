@@ -45,7 +45,10 @@ void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectH
 }
 void Renderer::RasterizeTriangle(
     const BarycentricCoordinateSystem &system,
-    const Eigen::Vector3<BarycentricCoordinateSystem::BCoordinates> &coordinates, Screen *) {
+    const Eigen::Vector3<BarycentricCoordinateSystem::BCoordinates> &coordinates, Screen *screen) {
+    int height = screen->GetHeight();
+    int width = screen->GetWidth();
+    system.GetTransformedTriangleCoordinates(coordinates);
 }
 Renderer::Matrix4d Renderer::MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
                                                                  const Vector3d &offset) {

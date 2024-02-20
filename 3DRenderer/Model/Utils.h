@@ -73,11 +73,12 @@ public:
         *this = evaluable.eval();
     }
     Vector3d GetCoordinates() const;
-    Vector4d GetHomogeneousCoordinates() const;
+    const Vector4d &GetHomogeneousCoordinates() const;
     template <typename T>
     Point &operator=(const T &evaluable) {
         return *this = evaluable.eval();
     }
+    double w();  // NOLINT
     Point &operator=(const Vector3d &);
     Point &operator=(const Vector4d &);
 

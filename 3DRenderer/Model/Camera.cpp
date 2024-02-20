@@ -19,7 +19,9 @@ void renderer::Camera::InitPerspective() {
 Triangle Camera::ApplyPerspectiveTransformation(const Triangle& vertices) const {
     Triangle ans = vertices;
     for (auto& i : ans.GetVerticies()) {
-        i.coordinates = perspective_matrix_ * i.coordinates.GetHomogeneousCoordinates();
+        Eigen::Vector4d temp = perspective_matrix_ * i.coordinates.GetHomogeneousCoordinates();
+        temp.topLeftCorner<3, 1>() /= temp.w();
+        i.coordinates = temp;
     }
     return ans;
 }
