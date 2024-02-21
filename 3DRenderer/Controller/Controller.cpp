@@ -10,14 +10,19 @@ bool Controller::HandleEvent(const sf::Event& event, model::Model& model) {
         case sf::Event::Closed:
             return true;
         case sf::Event::KeyPressed:
-            switch (event.key.code) {
+            HandleKeyEvent(event, model);
+            break;
+        default:
+            break;
+    }
+    return false;
+}
+bool Controller::HandleKeyEvent(const sf::Event& event, model::Model& model) {
 
-                case sf::Keyboard::A:
-                    model.TestUpdate();
-                    break;
-                default:
-                    break;
-            }
+    switch (event.key.code) {
+
+        case sf::Keyboard::A:
+            model.TestUpdate();
             break;
         default:
             break;

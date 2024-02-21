@@ -1,5 +1,8 @@
 #include "Model.h"
+#include "Primitives.h"
 #include "Screen.h"
+#include <algorithm>
+#include <memory>
 namespace model {
 Model::Model(int width, int height)
     : width_(width), height_(height), update_port_([this]() { return GetCurrentScreen(); }) {
@@ -19,6 +22,11 @@ void Model::TestUpdate() {
             screen->SetPixel(i, j, test_colors_[test_current_index_]);
         }
     }
+    Eigen::Matrix3d tr;
+    tr << -0.5, 0.5, 0, -0.5, 0, 0, 0.5, 0, 0;
+    renderer::Triangle triangle(tr);
+    renderer::BarycentricCoordinateSystem syst(triangle, triangle);
+    renderer_.RasteriseTriangle(syst, tr, &(*screen));
     ++test_current_index_;
     test_current_index_ = test_current_index_ % 2;
     current_screen_.reset(screen.release());

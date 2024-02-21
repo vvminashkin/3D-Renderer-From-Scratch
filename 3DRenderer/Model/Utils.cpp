@@ -60,7 +60,8 @@ Point& Point::operator=(const Vector4d& h_coordinates) {
     return *this;
 }
 Point& Point::operator=(const Vector3d& coordinates) {
-    data_ = coordinates;
+    data_.topLeftCorner<3, 1>() = coordinates;
+    data_.w() = 1;
     return *this;
 }
 Point::Vector3d renderer::Point::GetCoordinates() const {

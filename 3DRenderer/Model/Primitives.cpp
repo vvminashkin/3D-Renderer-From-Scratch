@@ -1,6 +1,12 @@
 #include "Primitives.h"
 #include <algorithm>
 namespace renderer {
+Triangle::Triangle(Eigen::Matrix3d coordinates) {
+
+    verticies_.x().coordinates = static_cast<Eigen::Vector3d>(coordinates.row(0));
+    verticies_.y().coordinates = static_cast<Eigen::Vector3d>(coordinates.row(1));
+    verticies_.z().coordinates = static_cast<Eigen::Vector3d>(coordinates.row(2));
+}
 Triangle::Vector3d Triangle::CalculateCoordinatesFromBarycentric(
     const Vector3d &coordinates) const {
     Vector3d ans = Vector3d::Zero();
@@ -61,5 +67,8 @@ Eigen::Vector3<Eigen::Vector3d> BarycentricCoordinateSystem::GetTriangleCoordina
 double BarycentricCoordinateSystem::InterpolateZCoordinate(
     const BarycentricCoordinateSystem::BCoordinates &coordinates) {
     return transformed_coordinates_matrix_.col(3).dot(coordinates);
+}
+RGB BarycentricCoordinateSystem::GetColor(Vector3d b_coordinate) const {
+    return {1, 0, 0};
 }
 }  // namespace renderer

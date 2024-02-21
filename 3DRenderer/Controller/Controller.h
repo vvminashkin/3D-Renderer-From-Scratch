@@ -11,6 +11,7 @@ public:
     Controller();
     RecievePortType *GetRecievePort();
     bool HandleEvent(const sf::Event &, model::Model &);
+    bool HandleKeyEvent(const sf::Event &, model::Model &);
 
 private:
 };

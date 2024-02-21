@@ -8,6 +8,8 @@ namespace renderer {
 class Triangle {
 public:
     using Vector3d = Eigen::Vector3d;
+    Triangle() = default;
+    Triangle(Eigen::Matrix3d);
     Vector3d CalculateCoordinatesFromBarycentric(const Vector3d &) const;
     Eigen::Vector3<Vertex> &GetVerticies();
     const Eigen::Vector3<Vertex> &GetVerticies() const;
@@ -29,6 +31,7 @@ public:
         const Eigen::Vector3<BCoordinates> &) const;
     Eigen::Vector3<Vector3d> GetTriangleCoordinates(const Eigen::Vector3<BCoordinates> &) const;
     double InterpolateZCoordinate(const BCoordinates &);
+    RGB GetColor(Vector3d b_coordinate) const;
 
 private:
     Triangle original_;

@@ -1,6 +1,4 @@
 #pragma once
-#include <algorithm>
-#include <memory>
 #include "Renderer.h"
 #include "../Observer/Observer.h"
 #include "Screen.h"
