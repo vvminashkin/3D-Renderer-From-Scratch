@@ -24,6 +24,13 @@ BarycentricCoordinateSystem::BarycentricCoordinateSystem(const Triangle &origina
         transformed_coordinates_matrix_.row(i) =
             transformed_.GetVerticies()[i].coordinates.GetHomogeneousCoordinates();
     }
+
+    barycentric_transformation_matrix_ =
+        transformed_coordinates_matrix_.topLeftCorner<2, 2>().transpose();
+    barycentric_transformation_matrix_.col(0) -=
+        transformed_coordinates_matrix_.row(2).topLeftCorner<1, 2>();
+    barycentric_transformation_matrix_.col(1) -=
+        transformed_coordinates_matrix_.row(2).topLeftCorner<1, 2>();
 }
 Eigen::Vector3<BarycentricCoordinateSystem::BCoordinates>
 BarycentricCoordinateSystem::GetTriangle() {
@@ -70,5 +77,13 @@ double BarycentricCoordinateSystem::InterpolateZCoordinate(
 }
 RGB BarycentricCoordinateSystem::GetColor(Vector3d b_coordinate) const {
     return {1, 0, 0};
+}
+BarycentricCoordinateSystem::Vector3d BarycentricCoordinateSystem::ConvertToBarycentricCoordinates(
+    Eigen::Vector2d vec) const {
+    vec -= transformed_coordinates_matrix_.row(2).topLeftCorner<1, 2>();
+    Vector3d ans;
+    ans.topLeftCorner<1, 2>() = barycentric_transformation_matrix_ * vec;
+    ans.z() = 1 - ans.x() - ans.y();
+    return ans;
 }
 }  // namespace renderer

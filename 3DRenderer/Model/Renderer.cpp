@@ -71,9 +71,25 @@ Eigen::Matrix3d TransformToCameraSpace(Eigen::Matrix3d triangle, size_t width, s
 
     triangle.col(1) /= dheight / 2;
     triangle.col(1) -= Eigen::Vector3d::Ones();
-    triangle.col(1) = -triangle.row(1);
+    triangle.col(1) = -triangle.col(1);
     return triangle;
 }
+Eigen::Vector2d TransformVectorToCameraSpace(Eigen::Vector2d vec, size_t width, size_t height) {
+    assert(width != 0);
+    assert(height != 0);
+
+    double dwidth = static_cast<double>(width);
+    double dheight = static_cast<double>(height);
+
+    vec.x() /= dwidth / 2;
+    vec.x() -= 1;
+
+    vec.y() /= dheight / 2;
+    vec.y() -= 1;
+    vec.y() = -vec.y();
+    return vec;
+}
+
 Vector3d ConvertToBarycentric(Eigen::Vector2d coordinates, const Eigen::Matrix3d &triangle) {
     Vector3d ans;
     coordinates -= triangle.row(2).topLeftCorner<1, 2>();
@@ -110,8 +126,10 @@ void Renderer::RasteriseTriangle(const BarycentricCoordinateSystem &system,
             Eigen::Vector2d vec = {static_cast<double>(x) + 0.5, static_cast<double>(y) + 0.5};
             Vector3d b_coordinate = ConvertToBarycentric(vec, screen_triangle);
             if (CheckIfInside(b_coordinate)) {
-                // TODO: z-buffer
-                screen->SetPixel(y, x, system.GetColor(b_coordinate));
+                // TODO z-buffer
+                vec = TransformVectorToCameraSpace(vec, width, height);
+                screen->SetPixel(y, x,
+                                 system.GetColor(system.ConvertToBarycentricCoordinates(vec)));
             }
         }
     }

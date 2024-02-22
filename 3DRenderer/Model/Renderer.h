@@ -30,6 +30,6 @@ private:
     void RasteriseTriangle(const BarycentricCoordinateSystem &, const Eigen::Matrix3d &, Screen *);
     static Matrix4d MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
                                                         const Vector3d &offset);
-    static void ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d &, Triangle *);
+    static void ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d &, Triangle *) ;
 };
 }  // namespace renderer
