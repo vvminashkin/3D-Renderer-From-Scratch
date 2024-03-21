@@ -85,4 +85,5 @@ public:
 private:
     Vector4d data_ = Vector4d::Ones();
 };
+bool DetermineSide(Eigen::Vector4d plane, Eigen::Vector3d point);
 }  // namespace renderer

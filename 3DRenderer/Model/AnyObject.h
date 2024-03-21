@@ -50,7 +50,6 @@ private:
         }
         Inner(T &&value) : value_(std::forward<T>(value)) {
         }
-
         const Mesh &GetMesh() const override {
             return value_.GetMesh();
         }

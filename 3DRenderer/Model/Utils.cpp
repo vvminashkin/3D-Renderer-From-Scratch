@@ -73,4 +73,11 @@ const Point::Vector4d& Point::GetHomogeneousCoordinates() const {
 double Point::w() {
     return data_.w();
 }
+bool DetermineSide(Eigen::Vector4d plane, Eigen::Vector3d point) {
+    assert("Plane is not zero" && (!(plane.x() == 0 && plane.y() == 0 && plane.z() == 0)));
+    Eigen::Vector3d point_on_plane = plane.topLeftCorner<3, 1>() * (-plane.w());
+    Eigen::Vector3d point_vector = point - point_on_plane;
+    double scalar_prod = plane.topLeftCorner<3, 1>().dot(point_vector);
+    return scalar_prod > 0;
+}
 }  // namespace renderer
