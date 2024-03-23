@@ -2,6 +2,7 @@
 #include "Eigen/Dense"
 #include "Eigen/src/Core/Matrix.h"
 #include <initializer_list>
+#include <list>
 namespace renderer {
 class RGB {
 public:
@@ -85,5 +86,12 @@ public:
 private:
     Vector4d data_ = Vector4d::Ones();
 };
-bool DetermineSide(Eigen::Vector4d plane, Eigen::Vector3d point);
+
+bool DetermineSide(const Eigen::Vector4d &plane, const Eigen::Vector3d &point);
+Eigen::Vector3d PlaneLineIntersection(const Eigen::Vector4d &plane, const Eigen::Vector3d &point1,
+                                      const Eigen::Vector3d &point2);
+// true if clipped
+bool ClipOneTriangle(const Eigen::Vector4d &plane, const Eigen::Matrix3d &triangle,
+                     std::list<Eigen::Matrix3d> *triangles);
+void ClipAllTriangles(const Eigen::Vector4d &plane, std::list<Eigen::Matrix3d> *triangles);
 }  // namespace renderer

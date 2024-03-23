@@ -82,7 +82,7 @@ BarycentricCoordinateSystem::Vector3d BarycentricCoordinateSystem::ConvertToBary
     Eigen::Vector2d vec) const {
     vec -= transformed_coordinates_matrix_.row(2).topLeftCorner<1, 2>();
     Vector3d ans;
-    ans.topLeftCorner<1, 2>() = barycentric_transformation_matrix_ * vec;
+    ans.topLeftCorner<2, 1>() = barycentric_transformation_matrix_ * vec;
     ans.z() = 1 - ans.x() - ans.y();
     return ans;
 }

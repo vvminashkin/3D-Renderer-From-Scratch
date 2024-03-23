@@ -18,6 +18,7 @@ private:
     std::shared_ptr<const renderer::Screen> current_screen_;
     std::vector<renderer::RGB> test_colors_ = {{0.5, 0.5, 0.5}, {0, 0, 0}};
     int test_current_index_ = 0;
+    double test_current_plane_d_ = 1;
     int width_;
     int height_;
 };
