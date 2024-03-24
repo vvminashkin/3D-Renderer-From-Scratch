@@ -1,6 +1,5 @@
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-find_package(Qt5 COMPONENTS Core REQUIRED)
 #find_package(SFML )
 set_source_files_properties(tags PROPERTIES GENERATED true)
 
