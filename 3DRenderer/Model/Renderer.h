@@ -20,6 +20,9 @@ public:
     Renderer() = default;
 
     std::unique_ptr<Screen> Draw(const World &world, size_t width, size_t height);
+    // Eigen offers no constexpr constructor
+    const Eigen::Matrix<double, 5, 4> kPlanes{
+        {0, 0, 1, 1}, {1, 0, 0, 1}, {-1, 0, 0, 1}, {0, 1, 0, 1}, {0, -1, 0, 1}};
 
 private:
     void ShiftTriangleCoordinates(const World::ObjectHolder &owner, Triangle *);

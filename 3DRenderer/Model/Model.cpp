@@ -15,7 +15,7 @@ Model::Model(int width, int height)
       world_(width, height) {
     renderer::BasicObject object;
     Eigen::Matrix3d test_triangle;
-    test_triangle << 2.6, -0.89, -9.54, 4.78, 3.81, -9.13, -4.17, -2.32, -6.68;
+    test_triangle << 2.6, -0.89, -9.54, 4.78, 3.81, -9.13, -5.81, -0.54, -3.84;
     object.AddTriangle(test_triangle);
     world_.AddObject(object);
 }

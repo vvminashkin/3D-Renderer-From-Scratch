@@ -105,8 +105,9 @@ void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectH
     BarycentricCoordinateSystem system(vertices, transformed_vertices);
     std::list<Eigen::Matrix3d> triangles;
     triangles.push_back(transformed_vertices.topLeftCorner<3, 3>());
-    // TODO: clip triangle
-    // for each clipped:
+    for (int i = 0; i < kPlanes.rows(); ++i) {
+        ClipAllTriangles(kPlanes.row(i), &triangles);
+    }
     for (const auto &curr : triangles) {
         RasteriseTriangle(system, curr, screen);
     }
