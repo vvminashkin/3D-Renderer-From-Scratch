@@ -8,7 +8,7 @@ class Mesh {
 public:
     using Vector3i = Eigen::Vector3i;
     struct ITriangle {
-        Vector3i points_;  // array of indices of parent_vertex_array_
+        Vector3i points_;
     };
     using VerticesConstIterator = std::vector<Vertex>::const_iterator;
     using TrianglesConstIterator = std::vector<ITriangle>::const_iterator;
@@ -17,6 +17,7 @@ public:
     Iterable<TrianglesConstIterator> GetTriangles() const;
 
     Triangle GetTriangleVertices(const ITriangle &) const;
+    void AddTriangle(const Eigen::Matrix3d &);
 
 private:
     std::vector<Vertex> vertices_;

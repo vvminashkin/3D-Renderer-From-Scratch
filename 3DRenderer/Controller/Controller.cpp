@@ -22,7 +22,7 @@ bool Controller::HandleKeyEvent(const sf::Event& event, model::Model& model) {
     switch (event.key.code) {
 
         case sf::Keyboard::A:
-            model.TestUpdate();
+            model.TestUpdateProjection();
             break;
         default:
             break;

@@ -2,6 +2,10 @@
 
 namespace renderer {
 
+World::World(int width, int height) {
+    Camera curr(width, height);
+    cameras_.push_back(curr);
+}
 void World::AddObject(AnyObject object) {
     objects_.emplace_back(std::move(object));
 
@@ -17,7 +21,7 @@ World::Vector3d World::GetOrigin() {
 const World::Quaterniond &World::GetCameraRotation() const {
     return cameras_[current_camera_ind_].GetAngle();
 }
-const World::Vector3d World::GetCameraPosition() const {
+const World::Vector3d &World::GetCameraPosition() const {
     return cameras_[current_camera_ind_].GetCoordinates();
 }
 const Camera &World::GetCamera() const {
@@ -61,8 +65,7 @@ void World::ObjectHolder::SetAngle(const Quaterniond &angle) {
 void World::ObjectHolder::SetAngle(const Eigen::AngleAxis<double> &angle) {
     rotation_ = angle;
 }
-World::CameraHolder::CameraHolder(Camera camera) {
-    *this = std::move(camera);
+World::CameraHolder::CameraHolder(Camera camera) : Camera(std::move(camera)) {
 }
 
 }  // namespace renderer

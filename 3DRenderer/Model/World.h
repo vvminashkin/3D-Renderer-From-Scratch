@@ -11,6 +11,7 @@ public:
     using Vector3d = Eigen::Vector3d;
     using Vector4d = Eigen::Vector4d;
     using Quaterniond = Eigen::Quaterniond;
+    World(int width, int height);
     auto GetObjectsIterable() const {
         return Iterable(objects_.begin(), objects_.end());
     };
@@ -21,7 +22,7 @@ public:
 
     const Quaterniond &GetCameraRotation() const;
 
-    const Vector3d GetCameraPosition() const;
+    const Vector3d &GetCameraPosition() const;
 
     const Camera &GetCamera() const;
 
@@ -61,6 +62,6 @@ public:
 private:
     std::vector<ObjectHolder> objects_;
     std::vector<CameraHolder> cameras_;
-    size_t current_camera_ind_;
+    size_t current_camera_ind_ = 0;
 };
 }  // namespace renderer

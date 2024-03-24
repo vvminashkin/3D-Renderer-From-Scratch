@@ -8,7 +8,8 @@ class Model {
 public:
     Model(int width, int height);
     void Subscribe(observer::CObserver<std::shared_ptr<const renderer::Screen>> *obs);
-    void TestUpdate();
+    void TestUpdateRasterization();
+    void TestUpdateProjection();
 
 private:
     std::optional<std::shared_ptr<const renderer::Screen>> GetCurrentScreen();
@@ -16,11 +17,12 @@ private:
     renderer::World world_;
     observer::CObservable<std::shared_ptr<const renderer::Screen>> update_port_;
     std::shared_ptr<const renderer::Screen> current_screen_;
+    int width_;
+    int height_;
+
     std::vector<renderer::RGB> test_colors_ = {{0.5, 0.5, 0.5}, {0, 0, 0}};
     int test_current_index_ = 0;
     double test_current_plane_d_ = 1;
-    int width_;
-    int height_;
 };
 
 };  // namespace model

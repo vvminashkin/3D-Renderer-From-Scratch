@@ -2,48 +2,6 @@
 #include "Primitives.h"
 #include <cassert>
 namespace renderer {
-Screen Renderer::Draw(const World &world, size_t width, size_t height) {
-    Screen screen(width, height);
-    for (const auto &object : world.GetObjectsIterable()) {
-        for (const auto &triangle : object->GetMesh().GetTriangles()) {
-            DrawTriangle(triangle, object, world, screen);
-        }
-    }
-    return screen;
-}
-
-void Renderer::ShiftTriangleCoordinates(const World::ObjectHolder &owner, Triangle *vertices) {
-    assert(vertices != nullptr);
-    Matrix4d transformation_matrix =
-        Renderer::MakeHomogeneousTransformationMatrix(owner.GetAngle(), owner.GetCoordinates());
-    Renderer::ApplyHomogeneousTransformationMatrix(transformation_matrix, &(*vertices));
-}
-
-void Renderer::ShiftTriangleToAlignCamera(const World &world, Triangle *vertices) {
-    assert(vertices != nullptr);
-    Matrix4d transformation_matrix = Renderer::MakeHomogeneousTransformationMatrix(
-        world.GetCameraRotation().inverse(), -world.GetCameraPosition());
-
-    Renderer::ApplyHomogeneousTransformationMatrix(transformation_matrix, vertices);
-}
-
-void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectHolder &owner_object,
-                            const World &world, Screen &screen) {
-
-    Triangle vertices = owner_object->GetMesh().GetTriangleVertices(current);
-
-    ShiftTriangleCoordinates(owner_object, &vertices);
-
-    ShiftTriangleToAlignCamera(world, &vertices);
-
-    Triangle transformed_vertices = world.GetCamera().ApplyPerspectiveTransformation(vertices);
-
-    BarycentricCoordinateSystem system(vertices, transformed_vertices);
-    // TODO: clip triangle
-    // for each clipped:
-    // TODO: convert to matrix
-    // RasterizeTriangle(system, system.GetTriangle(), &screen);
-}
 namespace {
 using Vector3d = Eigen::Vector3d;
 Eigen::Matrix3d TransformToScreenSpace(Eigen::Matrix3d triangle, size_t width, size_t height) {
@@ -106,6 +64,54 @@ bool CheckIfInside(const Vector3d &b_coordinate) {
            b_coordinate.y() >= 0.0 && b_coordinate.z() <= 1.0 && b_coordinate.z() >= 0;
 }
 };  // namespace
+std::unique_ptr<Screen> Renderer::Draw(const World &world, size_t width, size_t height) {
+    std::unique_ptr<Screen> screen(new Screen(width, height));
+    for (const auto &object : world.GetObjectsIterable()) {
+        for (const auto &triangle : object->GetMesh().GetTriangles()) {
+            DrawTriangle(triangle, object, world, screen.get());
+        }
+    }
+    return screen;
+}
+
+void Renderer::ShiftTriangleCoordinates(const World::ObjectHolder &owner, Triangle *vertices) {
+    assert(vertices != nullptr);
+    Matrix4d transformation_matrix =
+        Renderer::MakeHomogeneousTransformationMatrix(owner.GetAngle(), owner.GetCoordinates());
+    Renderer::ApplyHomogeneousTransformationMatrix(transformation_matrix, &(*vertices));
+}
+
+void Renderer::ShiftTriangleToAlignCamera(const World &world, Triangle *vertices) {
+    assert(vertices != nullptr);
+    Matrix4d transformation_matrix = Renderer::MakeHomogeneousTransformationMatrix(
+        world.GetCameraRotation().inverse(), -world.GetCameraPosition());
+
+    Renderer::ApplyHomogeneousTransformationMatrix(transformation_matrix, vertices);
+}
+
+void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectHolder &owner_object,
+                            const World &world, Screen *screen) {
+
+    Triangle vertices = owner_object->GetMesh().GetTriangleVertices(current);
+
+    ShiftTriangleCoordinates(owner_object, &vertices);
+
+    ShiftTriangleToAlignCamera(world, &vertices);
+
+    Eigen::Matrix<double, 3, 4> transformed_vertices =
+        world.GetCamera().ApplyPerspectiveTransformation(
+            vertices.GetVerticesHomogeniousCoordinates());
+
+    BarycentricCoordinateSystem system(vertices, transformed_vertices);
+    std::list<Eigen::Matrix3d> triangles;
+    triangles.push_back(transformed_vertices.topLeftCorner<3, 3>());
+    // TODO: clip triangle
+    // for each clipped:
+    for (const auto &curr : triangles) {
+        RasteriseTriangle(system, curr, screen);
+    }
+    // RasterizeTriangle(system, system.GetTriangle(), &screen);
+}
 void Renderer::RasteriseTriangle(const BarycentricCoordinateSystem &system,
                                  const Eigen::Matrix3d &coordinates, Screen *screen) {
     size_t height = screen->GetHeight();
@@ -115,12 +121,15 @@ void Renderer::RasteriseTriangle(const BarycentricCoordinateSystem &system,
     size_t min_y = -1;
     size_t max_x = 0;
     size_t max_y = 0;
+
     for (int i = 0; i < 3; ++i) {
         min_x = std::min(static_cast<size_t>(std::floor(screen_triangle.row(i).x())), min_x);
         min_y = std::min(static_cast<size_t>(std::floor(screen_triangle.row(i).y())), min_y);
         max_x = std::max(static_cast<size_t>(std::ceil(screen_triangle.row(i).x())), max_x);
         max_y = std::max(static_cast<size_t>(std::ceil(screen_triangle.row(i).y())), max_y);
     }
+    assert("bounded dimensions are OK" && max_x < screen->GetWidth() &&
+           max_y < screen->GetHeight());
     for (size_t x = min_x; x <= max_x; ++x) {
         for (size_t y = min_y; y <= max_y; ++y) {
             Eigen::Vector2d vec = {static_cast<double>(x) + 0.5, static_cast<double>(y) + 0.5};

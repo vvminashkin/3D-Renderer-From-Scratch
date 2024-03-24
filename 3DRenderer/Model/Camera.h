@@ -7,12 +7,14 @@
 namespace renderer {
 class Camera {
 public:
-    Triangle ApplyPerspectiveTransformation(const Triangle&) const;
+    Camera(int width, int height);
+    Eigen::Matrix<double, 3, 4> ApplyPerspectiveTransformation(
+        const Eigen::Matrix<double, 3, 4> &) const;
 
 private:
     void InitPerspective();
 
-    static constexpr double kDefaultNearPlaneDistance = 1;
+    static constexpr double kDefaultNearPlaneDistance = 2;
 
     double r_, l_, t_, b_;  // not sure what are these
     Eigen::Matrix4d perspective_matrix_ = Eigen::Matrix4d::Zero();

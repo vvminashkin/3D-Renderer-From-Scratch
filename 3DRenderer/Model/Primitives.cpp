@@ -16,13 +16,11 @@ Triangle::Vector3d Triangle::CalculateCoordinatesFromBarycentric(
     return ans;
 }
 BarycentricCoordinateSystem::BarycentricCoordinateSystem(const Triangle &original,
-                                                         const Triangle &transformed)
-    : original_(original), transformed_(transformed) {
+                                                         const Matrix34d &transformed)
+    : original_(original), transformed_coordinates_matrix_(transformed) {
     for (int i = 0; i < 3; ++i) {
         original_coordinates_matrix_.row(i) =
             original_.GetVerticies()[i].coordinates.GetHomogeneousCoordinates();
-        transformed_coordinates_matrix_.row(i) =
-            transformed_.GetVerticies()[i].coordinates.GetHomogeneousCoordinates();
     }
 
     barycentric_transformation_matrix_ =
@@ -84,6 +82,13 @@ BarycentricCoordinateSystem::Vector3d BarycentricCoordinateSystem::ConvertToBary
     Vector3d ans;
     ans.topLeftCorner<2, 1>() = barycentric_transformation_matrix_ * vec;
     ans.z() = 1 - ans.x() - ans.y();
+    return ans;
+}
+Eigen::Matrix<double, 3, 4> Triangle::GetVerticesHomogeniousCoordinates() const {
+    Eigen::Matrix<double, 3, 4> ans;
+    for (int i = 0; i < 3; ++i) {
+        ans.row(i) = verticies_[i].coordinates.GetHomogeneousCoordinates();
+    }
     return ans;
 }
 }  // namespace renderer

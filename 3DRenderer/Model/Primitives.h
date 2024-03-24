@@ -13,7 +13,9 @@ public:
     Vector3d CalculateCoordinatesFromBarycentric(const Vector3d &) const;
     Eigen::Vector3<Vertex> &GetVerticies();
     const Eigen::Vector3<Vertex> &GetVerticies() const;
+    // bad design :-)
     Eigen::Vector3<Vector3d> GetVerticiesCoordinates() const;
+    Eigen::Matrix<double, 3, 4> GetVerticesHomogeniousCoordinates() const;
 
 private:
     Eigen::Vector3<Vertex> verticies_;
@@ -25,7 +27,7 @@ public:
     using Matrix34d = Eigen::Matrix<double, 3, 4>;
     using Matrix2d = Eigen::Matrix2d;
     Eigen::Vector3<BCoordinates> GetTriangle();
-    BarycentricCoordinateSystem(const Triangle &original, const Triangle &transformed);
+    BarycentricCoordinateSystem(const Triangle &original, const Matrix34d &transformed);
     Vector3d GetOriginalCoordinates(const BCoordinates &) const;
     Vector3d GetTransformedCoordinates(const BCoordinates &) const;
     Eigen::Vector3<Vector3d> GetTransformedTriangleCoordinates(
@@ -33,13 +35,12 @@ public:
     Eigen::Vector3<Vector3d> GetTriangleCoordinates(const Eigen::Vector3<BCoordinates> &) const;
     double InterpolateZCoordinate(const BCoordinates &);
     RGB GetColor(Vector3d b_coordinate) const;
-    Vector3d ConvertToBarycentricCoordinates(Eigen::Vector2d)const ;
+    Vector3d ConvertToBarycentricCoordinates(Eigen::Vector2d) const;
 
-  private:
+private:
     Triangle original_;
-    Triangle transformed_;
     Matrix34d original_coordinates_matrix_;
     Matrix34d transformed_coordinates_matrix_;
     Matrix2d barycentric_transformation_matrix_;
-}; 
+};
 }  // namespace renderer
