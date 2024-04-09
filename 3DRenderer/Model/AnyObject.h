@@ -15,11 +15,8 @@ public:
     }
 
     template <typename T>
-    AnyObject(T &&object) : inner_(new Inner<std::remove_reference_t<T>>(std::forward<T>(object))) {
-    }
-    template <typename T>
-    AnyObject(const T &object)
-        : inner_(std::make_unique<Inner<std::remove_reference_t<T>>>(object)) {
+    AnyObject(T &&object)
+        : inner_(std::make_unique<Inner<std::remove_reference_t<T>>>(std::forward<T>(object))) {
     }
     AnyObject(AnyObject &&) noexcept = default;
     AnyObject &operator=(AnyObject &&) noexcept = default;
@@ -52,7 +49,7 @@ private:
     public:
         /*Inner(const T &value) : value_(value) {
         }*/
-        Inner(T &&value) : value_(std::forward<T>(value)) {
+        Inner(T &&value) : value_(std::move(value)) {
         }
         Inner(const T &value) : value_(value) {
         }

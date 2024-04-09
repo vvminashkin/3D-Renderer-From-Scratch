@@ -1,4 +1,4 @@
-#include "Model.h"
+#include "GraphicEngine.h"
 #include "Eigen/src/Core/Matrix.h"
 #include "Primitives.h"
 #include "Screen.h"
@@ -7,27 +7,30 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
-namespace model {
-Model::Model(int width, int height)
+namespace kernel {
+GraphicEngine::GraphicEngine(int width, int height)
     : width_(width),
       height_(height),
-      update_port_([this]() { return GetCurrentScreen(); }),
+      current_screen_(width, height),
+      update_port_([this]() -> std::reference_wrapper<const renderer::Screen> {
+          return this->current_screen_;
+      }),
       world_(width, height) {
     renderer::BasicObject object;
     Eigen::Matrix3d test_triangle;
-    test_triangle << 2.6, -0.89, -9.54, 4.78, 3.81, -9.13, -5.81, -0.54, -3.84;
+    test_triangle << -0.61, -4.62, -9.54, 0.99, 6.23, -9.13, -0.46, 0.18, -1.47;
     object.AddTriangle(test_triangle);
     world_.AddObject(object);
 }
 
-std::optional<std::shared_ptr<const renderer::Screen>> Model::GetCurrentScreen() {
+const renderer::Screen& GraphicEngine::GetCurrentScreen() {
     return current_screen_;
 }
 
-void Model::Subscribe(observer::CObserver<std::shared_ptr<const renderer::Screen>>* obs) {
+void GraphicEngine::Subscribe(observer::CObserver<const renderer::Screen>* obs) {
     update_port_.subscribe(obs);
 }
-void Model::TestUpdateRasterization() {
+void GraphicEngine::TestUpdateRasterization() {
     std::unique_ptr<renderer::Screen> screen = std::make_unique<renderer::Screen>(width_, height_);
     test_current_plane_d_ -= 0.02;
     Eigen::Vector4d plane = {1 / std::sqrt(2), 1 / std::sqrt(2), 0, test_current_plane_d_};
@@ -53,16 +56,16 @@ void Model::TestUpdateRasterization() {
     triangles.push_back(tr);
     renderer::ClipAllTriangles(plane, &triangles);
     for (const auto& curr_triangle : triangles) {
-        renderer_.RasteriseTriangle(syst, curr_triangle, &(*screen));
+        renderer_.RasterizeTriangle(syst, curr_triangle, &(*screen));
     }
     ++test_current_index_;
     test_current_index_ = test_current_index_ % 2;
-    current_screen_.reset(screen.release());
+    current_screen_ = std::move(*screen.release());
     update_port_.notify();
 }
-void Model::TestUpdateProjection() {
+void GraphicEngine::TestUpdateProjection() {
     std::unique_ptr<renderer::Screen> screen(std::move(renderer_.Draw(world_, width_, height_)));
-    current_screen_.reset(screen.release());
+    current_screen_ = std::move(*screen.release());
     update_port_.notify();
 }
-}  // namespace model
+}  // namespace kernel

@@ -27,6 +27,20 @@ double renderer::RGB::GetB() const {
 void renderer::RGB::SetB(double val) {
     val_(2) = val;
 }
+uint8_t RGB::DoubleToInt(double val) {
+    return std::max(static_cast<uint8_t>(val * 255.0), uint8_t{0});
+}
+uint8_t RGB::GetRi() const {
+    return DoubleToInt(GetR());
+}
+uint8_t RGB::GetGi() const {
+
+    return DoubleToInt(GetG());
+}
+uint8_t RGB::GetBi() const {
+
+    return DoubleToInt(GetB());
+}
 RGB::RGB() : val_(Vector3d::Zero()) {
 }
 Direction::Direction(const Vector3d& vec) : data_(vec) {

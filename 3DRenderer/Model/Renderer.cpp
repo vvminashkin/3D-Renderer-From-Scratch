@@ -63,6 +63,12 @@ bool CheckIfInside(const Vector3d &b_coordinate) {
     return b_coordinate.x() <= 1.0 && b_coordinate.x() >= 0.0 && b_coordinate.y() <= 1.0 &&
            b_coordinate.y() >= 0.0 && b_coordinate.z() <= 1.0 && b_coordinate.z() >= 0;
 }
+size_t RoundDown(double coordinate) {
+    return static_cast<size_t>(std::max(0.0, std::floor(coordinate)));
+}
+size_t RoundUp(double coordinate) {
+    return static_cast<size_t>(std::ceil(coordinate));
+}
 };  // namespace
 std::unique_ptr<Screen> Renderer::Draw(const World &world, size_t width, size_t height) {
     std::unique_ptr<Screen> screen(new Screen(width, height));
@@ -97,23 +103,27 @@ void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectH
     ShiftTriangleCoordinates(owner_object, &vertices);
 
     ShiftTriangleToAlignCamera(world, &vertices);
-
     Eigen::Matrix<double, 3, 4> transformed_vertices =
         world.GetCamera().ApplyPerspectiveTransformation(
             vertices.GetVerticesHomogeniousCoordinates());
-
     BarycentricCoordinateSystem system(vertices, transformed_vertices);
     std::list<Eigen::Matrix3d> triangles;
-    triangles.push_back(transformed_vertices.topLeftCorner<3, 3>());
-    for (int i = 0; i < kPlanes.rows(); ++i) {
-        ClipAllTriangles(kPlanes.row(i), &triangles);
+    triangles.push_back(vertices.GetVerticesHomogeniousCoordinates().topLeftCorner<3, 3>());
+
+    for (int i = 0; i < world.GetCamera().GetClippingPlanes().rows(); ++i) {
+        ClipAllTriangles(world.GetCamera().GetClippingPlanes().row(i), &triangles);
     }
+
     for (const auto &curr : triangles) {
-        RasteriseTriangle(system, curr, screen);
+        Eigen::Matrix<double, 3, 4> homogeneous_coords;
+        homogeneous_coords.topLeftCorner<3, 3>() = curr;
+        homogeneous_coords.col(3) = Vector3d::Ones();
+        homogeneous_coords = world.GetCamera().ApplyPerspectiveTransformation(homogeneous_coords);
+        RasterizeTriangle(system, homogeneous_coords.topLeftCorner<3, 3>(), screen);
     }
     // RasterizeTriangle(system, system.GetTriangle(), &screen);
 }
-void Renderer::RasteriseTriangle(const BarycentricCoordinateSystem &system,
+void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &system,
                                  const Eigen::Matrix3d &coordinates, Screen *screen) {
     size_t height = screen->GetHeight();
     size_t width = screen->GetWidth();
@@ -124,16 +134,18 @@ void Renderer::RasteriseTriangle(const BarycentricCoordinateSystem &system,
     size_t max_y = 0;
 
     for (int i = 0; i < 3; ++i) {
-        min_x = std::min(static_cast<size_t>(std::floor(screen_triangle.row(i).x())), min_x);
-        min_y = std::min(static_cast<size_t>(std::floor(screen_triangle.row(i).y())), min_y);
-        max_x = std::max(static_cast<size_t>(std::ceil(screen_triangle.row(i).x())), max_x);
-        max_y = std::max(static_cast<size_t>(std::ceil(screen_triangle.row(i).y())), max_y);
+        min_x = std::min(RoundDown(screen_triangle.row(i).x()), min_x);
+        min_y = std::min(RoundDown(screen_triangle.row(i).y()), min_y);
+        max_x = std::max(RoundUp(screen_triangle.row(i).x()), max_x);
+        max_y = std::max(RoundUp(screen_triangle.row(i).y()), max_y);
     }
-    assert("bounded dimensions are OK" && max_x < screen->GetWidth() &&
-           max_y < screen->GetHeight());
+    assert("bounded dimensions are not OK" && max_x < 2 * screen->GetWidth() &&
+           max_y < 2 * screen->GetHeight());
+    max_x = std::min(static_cast<size_t>(screen->GetWidth() - 1), max_x);
+    max_y = std::min(static_cast<size_t>(screen->GetHeight() - 1), max_y);
     for (size_t x = min_x; x <= max_x; ++x) {
         for (size_t y = min_y; y <= max_y; ++y) {
-            Eigen::Vector2d vec = {static_cast<double>(x) + 0.5, static_cast<double>(y) + 0.5};
+            Eigen::Vector2d vec = {static_cast<double>(x) + 0.5, static_cast<double>(y)};
             Vector3d b_coordinate = ConvertToBarycentric(vec, screen_triangle);
             if (CheckIfInside(b_coordinate)) {
                 // TODO z-buffer

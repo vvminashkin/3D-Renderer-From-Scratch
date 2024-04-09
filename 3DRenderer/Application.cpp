@@ -1,5 +1,5 @@
 #include "Application.h"
-#include "Controller/Controller.h"
+#include "Controller/GEngineController.h"
 #include <iostream>
 namespace application {
 void HandleException() {
@@ -13,27 +13,23 @@ void HandleException() {
         std::cerr << "Application failed with unknown exception";
     }
 }
+Application::Application()
+    : model_(kDefaultWidth, kDefaultHeight),
+      view_(kDefaultWidth, kDefaultHeight),
+      controller_(&model_) {
+    model_.Subscribe(view_.GetRecievePort());
+}
 void Application::Run() {
-    model::Model model(Application::GetWidth(), Application::GetHeight());
-    view::View view(Application::GetWidth(), Application::GetHeight());
-    controller::Controller controller;
-    model.Subscribe(view.GetRecievePort());
     bool closed = false;
-    while (true) {
+    while (!closed) {
         sf::Event event;
-        while (view.GetEvent(event)) {
-            closed = controller.HandleEvent(event, model);
-        }
-        if (closed) {
-            break;
+        while (view_.GetEvent(event)) {
+            closed = controller_.HandleEvent(event);
+            if (closed) {
+                break;
+            }
         }
     }
 }
 
-constexpr int Application::GetWidth() {
-    return 1500;
-}
-constexpr int Application::GetHeight() {
-    return 1000;
-}
 }  // namespace application

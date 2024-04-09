@@ -16,8 +16,13 @@ public:
     double GetB() const;
     void SetB(double);
 
+    uint8_t GetRi() const;
+    uint8_t GetGi() const;
+    uint8_t GetBi() const;
+
 private:
     // r,g,b
+    static uint8_t DoubleToInt(double val);
     Vector3d val_;
 };
 template <typename Iterator>

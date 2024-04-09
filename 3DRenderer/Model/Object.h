@@ -5,9 +5,6 @@
 namespace renderer {
 class BasicObject {
 public:
-    BasicObject(BasicObject &&) = default;
-    BasicObject(const BasicObject &) = default;
-    BasicObject() = default;
     void AddTriangle(const Eigen::Matrix3d &);
     const Mesh &GetMesh() const {
         return mesh_;

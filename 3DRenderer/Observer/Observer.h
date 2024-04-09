@@ -89,13 +89,13 @@ class CObserver {
     using CData = TData;
     using CSendBy = TSendBy;
 
-    using CObservable1 = CObservable<CData, CSendBy>;
+    using CMyObservable = CObservable<CData, CSendBy>;
 
     using CDataSentBy = NSObserverDetail::CDataSentBy<CData, CSendBy>;
     using CSignature = void(CDataSentBy);
     using CAction = std::function<CSignature>;
 
-    friend CObservable1;
+    friend CMyObservable;
 
 public:
     using CArg = CDataSentBy;
@@ -126,12 +126,12 @@ public:
     }
 
 private:
-    void setObservable(CObservable1* observable) {
+    void setObservable(CMyObservable* observable) {
         assert(observable);
         Observable_ = observable;
     }
 
-    CObservable1* Observable_ = nullptr;
+    CMyObservable* Observable_ = nullptr;
     CAction onSubscribe_;
     CAction onNotify_;
     CAction onUnsubscribe_;
@@ -229,12 +229,12 @@ class CObserver<void, void> {
     using CData = void;
     using CSendBy = void;
 
-    using CObservable1 = CObservable<CData, CSendBy>;
+    using CMyObservable = CObservable<CData, CSendBy>;
 
     using CSignature = void();
     using CAction = std::function<CSignature>;
 
-    friend CObservable1;
+    friend CMyObservable;
 
 public:
     using CArg = void;
@@ -264,12 +264,12 @@ public:
     }
 
 private:
-    void setObservable(CObservable1* observable) {
+    void setObservable(CMyObservable* observable) {
         assert(observable);
         Observable_ = observable;
     }
 
-    CObservable1* Observable_ = nullptr;
+    CMyObservable* Observable_ = nullptr;
     CAction onSubscribe_;
     CAction onNotify_;
     CAction onUnsubscribe_;
