@@ -6,16 +6,19 @@
 #include "Primitives.h"
 #include "World.h"
 #include "Screen.h"
+
 namespace model {
 class Model;
 }
 namespace renderer {
 class Renderer {
+
+public:
     using Matrix4d = Eigen::Matrix4d;
     using Quaterniond = Eigen::Quaterniond;
     using Vector3d = Eigen::Vector3d;
-
-public:
+    using Vector4d = Eigen::Vector4d;
+    using Matrix3d = Eigen::Matrix3d;
     friend class model::Model;
     Renderer() = default;
 
@@ -28,9 +31,19 @@ public:
 
     void RasterizeTriangle(const BarycentricCoordinateSystem &, const Eigen::Matrix3d &, Screen *);
 
+    static bool DetermineSide(const Eigen::Vector4d &plane, const Eigen::Vector3d &point);
+    static Eigen::Vector3d PlaneLineIntersection(const Eigen::Vector4d &plane,
+                                                 const Eigen::Vector3d &point1,
+                                                 const Eigen::Vector3d &point2);
+    // true if clipped
+    static bool ClipOneTriangle(const Eigen::Vector4d &plane, const Eigen::Matrix3d &triangle,
+                                std::list<Eigen::Matrix3d> *triangles);
+    static void ClipAllTriangles(const Eigen::Vector4d &plane,
+                                 std::list<Eigen::Matrix3d> *triangles);
+
 private:
     static Matrix4d MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
                                                         const Vector3d &offset);
-    static void ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d &, Triangle *);
+    static void ApplyMatrix(const Eigen::Matrix4d &, Triangle *);
 };
 }  // namespace renderer

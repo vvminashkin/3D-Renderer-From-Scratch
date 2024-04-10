@@ -7,9 +7,8 @@ World::World(int width, int height) {
     cameras_.push_back(curr);
 }
 void World::AddObject(AnyObject object) {
-    objects_.emplace_back(std::move(object));
-
-    objects_.back().SetAngle(Eigen::AngleAxis<double>(0, Eigen::Vector3d::UnitX()));
+    objects_.emplace_back(std::move(object), World::GetOrigin(),
+                          Eigen::AngleAxis<double>(0, Eigen::Vector3d::UnitX()));
 }
 void World::AddObject(AnyObject object, const Eigen::Vector3d &global_coordinates) {
     objects_.emplace_back(std::move(object), global_coordinates,
@@ -65,7 +64,7 @@ void World::ObjectHolder::SetAngle(const Quaterniond &angle) {
 void World::ObjectHolder::SetAngle(const Eigen::AngleAxis<double> &angle) {
     rotation_ = angle;
 }
-World::CameraHolder::CameraHolder(Camera camera) : Camera(std::move(camera)) {
+World::CameraHolder::CameraHolder(const Camera &camera) : Camera(camera) {
 }
 
 }  // namespace renderer

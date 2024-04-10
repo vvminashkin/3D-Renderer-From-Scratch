@@ -3,10 +3,14 @@
 #include "Vertex.h"
 #include <Eigen/Dense>
 #include <vector>
+#include <functional>
+
 namespace renderer {
 class Mesh {
 public:
     using Vector3i = Eigen::Vector3i;
+    using Vector3d = Eigen::Vector3d;
+    Mesh(std::function<RGB(const Triangle &, Vector3d)> color_function);
     struct ITriangle {
         Vector3i points_;
     };
@@ -16,11 +20,12 @@ public:
 
     Iterable<TrianglesConstIterator> GetTriangles() const;
 
-    Triangle GetTriangleVertices(const ITriangle &) const;
+    Triangle MakeTriangleVertices(const ITriangle &) const;
     void AddTriangle(const Eigen::Matrix3d &);
 
 private:
     std::vector<Vertex> vertices_;
     std::vector<ITriangle> triangles_;
+    std::function<RGB(const Triangle &, Vector3d)> color_function_;
 };
 }  // namespace renderer

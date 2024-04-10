@@ -3,11 +3,13 @@
 #include "../Observer/Observer.h"
 #include "Screen.h"
 #include "Utils.h"
+
 namespace kernel {
 class GraphicEngine {
 public:
+    using Screen = renderer::Screen;
     GraphicEngine(int width, int height);
-    void Subscribe(observer::CObserver<const renderer::Screen>* obs);
+    void Subscribe(observer::CObserver<const Screen>* obs);
     void TestUpdateRasterization();
     void TestUpdateProjection();
 
@@ -15,7 +17,7 @@ private:
     const renderer::Screen& GetCurrentScreen();
     renderer::Renderer renderer_;
     renderer::World world_;
-    observer::CObservable<const renderer::Screen> update_port_;
+    observer::CObservable<const Screen> update_port_;
     renderer::Screen current_screen_;
     int width_;
     int height_;

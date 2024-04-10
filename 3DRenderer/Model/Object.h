@@ -2,10 +2,13 @@
 
 #include "Mesh.h"
 #include <iostream>
+
 namespace renderer {
 class BasicObject {
 public:
-    void AddTriangle(const Eigen::Matrix3d &);
+    BasicObject(std::function<RGB(const Triangle &, Eigen::Vector3d)>);
+    using Matrix3d = Eigen::Matrix3d;
+    void AddTriangle(const Matrix3d &);
     const Mesh &GetMesh() const {
         return mesh_;
     }

@@ -1,27 +1,16 @@
 //
 // Created by supernyan on 07.01.24.
 //
-#include "Camera.h"
 #include <cassert>
+#include "Camera.h"
 namespace renderer {
 Camera::Camera(int width, int height) {
-    double dwidth = static_cast<double>(width);
-    double dheight = static_cast<double>(height);
-    assert("correct width and height given to camera" && dwidth > 0 && dheight > 0);
-    double aspect_ratio = dheight / dwidth;
-    l_ = -1;
-    r_ = 1;
-    b_ = -aspect_ratio;
-    t_ = -b_;
-
-    // eq. 5.27 mathematics for 3d game...
-    fov_ = 2.0 * std::atan(1 / near_plane_distance_);
+    InitConstants(width, height);
     InitPerspective();
     InitPlanes();
 }
-Eigen::Matrix<double, 3, 4> Camera::ApplyPerspectiveTransformation(
-    const Eigen::Matrix<double, 3, 4>& vertices) const {
-    Eigen::Matrix<double, 3, 4> ans = vertices;
+Camera::Matrix34d Camera::ApplyPerspectiveTransformation(const Camera::Matrix34d& vertices) const {
+    Matrix34d ans = vertices;
     ans = (perspective_matrix_ * ans.transpose()).transpose();
     for (int i = 0; i < 3; ++i) {
         assert("in perspetive transformation w coordinate is not zero" && ans.row(i).w() != 0);
@@ -51,5 +40,17 @@ void Camera::InitPlanes() {
     planes_ << 0, 0, -1.0, near_plane_distance_, focal_length / x_norm_coef, 0, -1.0 / x_norm_coef,
         0, -focal_length / x_norm_coef, 0, -1.0 / x_norm_coef, 0, 0, focal_length / y_norm_coef,
         -t_ / y_norm_coef, 0, 0, -focal_length / y_norm_coef, -t_ / y_norm_coef, 0;
+}
+void Camera::InitConstants(int width, int height) {
+    double dwidth = static_cast<double>(width);
+    double dheight = static_cast<double>(height);
+    assert("correct width and height given to camera" && dwidth > 0 && dheight > 0);
+    double aspect_ratio = dheight / dwidth;
+    l_ = -1;
+    r_ = 1;
+    b_ = -aspect_ratio;
+    t_ = -b_;
+    // eq. 5.27 mathematics for 3d game...
+    fov_ = 2.0 * std::atan(1 / near_plane_distance_);
 }
 }  // namespace renderer

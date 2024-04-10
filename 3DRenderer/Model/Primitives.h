@@ -1,38 +1,42 @@
 #pragma once
 
-#include <Eigen/Dense>
-
 #include "Utils.h"
+#include <Eigen/Dense>
 #include "Vertex.h"
+
 namespace renderer {
 class Triangle {
 public:
     using Vector3d = Eigen::Vector3d;
+    using Matrix34d = Eigen::Matrix<double, 3, 4>;
+    using Matrix3d = Eigen::Matrix3d;
     Triangle() = default;
-    Triangle(Eigen::Matrix3d);
+    Triangle(Eigen::Matrix3d, const std::function<RGB(const Triangle &, Vector3d)> *);
     Vector3d CalculateCoordinatesFromBarycentric(const Vector3d &) const;
     Eigen::Vector3<Vertex> &GetVerticies();
     const Eigen::Vector3<Vertex> &GetVerticies() const;
-    // bad design :-)
-    Eigen::Vector3<Vector3d> GetVerticiesCoordinates() const;
-    Eigen::Matrix<double, 3, 4> GetVerticesHomogeniousCoordinates() const;
+    Matrix3d GetVerticiesCoordinates() const;
+    Matrix34d GetVerticesHomogeniousCoordinates() const;
+    RGB GetColor(Vector3d b_coordinate) const;
+    void SetColorFunction(const std::function<RGB(const Triangle &, Vector3d)> *);
 
 private:
     Eigen::Vector3<Vertex> verticies_;
+    const std::function<RGB(const Triangle &, Vector3d)> *color_function_p_ = nullptr;
 };
 class BarycentricCoordinateSystem {
 public:
     using Vector3d = Eigen::Vector3d;
+    using Vector4d = Eigen::Vector4d;
     using BCoordinates = Vector3d;
     using Matrix34d = Eigen::Matrix<double, 3, 4>;
     using Matrix2d = Eigen::Matrix2d;
-    Eigen::Vector3<BCoordinates> GetTriangle();
+    using Matrix3d = Eigen::Matrix3d;
+
     BarycentricCoordinateSystem(const Triangle &original, const Matrix34d &transformed);
     Vector3d GetOriginalCoordinates(const BCoordinates &) const;
-    Vector3d GetTransformedCoordinates(const BCoordinates &) const;
-    Eigen::Vector3<Vector3d> GetTransformedTriangleCoordinates(
-        const Eigen::Vector3<BCoordinates> &) const;
-    Eigen::Vector3<Vector3d> GetTriangleCoordinates(const Eigen::Vector3<BCoordinates> &) const;
+    Vector4d GetTransformedCoordinates(const BCoordinates &) const;
+    Matrix3d GetTriangleCoordinates(const Eigen::Vector3<BCoordinates> &) const;
     double InterpolateZCoordinate(const BCoordinates &);
     RGB GetColor(Vector3d b_coordinate) const;
     Vector3d ConvertToBarycentricCoordinates(Eigen::Vector2d) const;

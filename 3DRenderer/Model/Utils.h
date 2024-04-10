@@ -3,11 +3,13 @@
 #include "Eigen/src/Core/Matrix.h"
 #include <initializer_list>
 #include <list>
+#include <type_traits>
+
 namespace renderer {
 class RGB {
 public:
     using Vector3d = Eigen::Vector3d;
-    RGB(const std::initializer_list<double> &);
+    RGB(std::initializer_list<double>);
     RGB();
     double GetR() const;
     void SetR(double);
@@ -74,15 +76,21 @@ public:
     Point() = default;
     Point(const Vector3d &);
     Point(const Vector4d &);
-    template <typename T>
-    Point(const T &evaluable) {
-        *this = evaluable.eval();
-    }
+
     Vector3d GetCoordinates() const;
     const Vector4d &GetHomogeneousCoordinates() const;
-    template <typename T>
-    Point &operator=(const T &evaluable) {
-        return *this = (evaluable.eval());
+    template <typename T, class = typename std::enable_if<!std::is_same_v<Vector3d, T> &&
+                                                          std::is_convertible_v<T, Vector3d>>>
+    Point &operator=(const T &val) {
+        return *this = static_cast<Vector3d>(val.eval());
+    }
+
+    template <typename T, typename F,
+              class = typename std::enable_if<!std::is_same_v<Vector4d, T> &&
+                                              !std::is_convertible_v<T, Vector3d> &&
+                                              std::is_convertible_v<T, Vector4d>>>
+    Point &operator=(const T &val) {
+        return *this = static_cast<Vector4d>(val.eval());
     }
     double w();  // NOLINT
     Point &operator=(const Vector3d &);
@@ -92,11 +100,4 @@ private:
     Vector4d data_ = Vector4d::Ones();
 };
 
-bool DetermineSide(const Eigen::Vector4d &plane, const Eigen::Vector3d &point);
-Eigen::Vector3d PlaneLineIntersection(const Eigen::Vector4d &plane, const Eigen::Vector3d &point1,
-                                      const Eigen::Vector3d &point2);
-// true if clipped
-bool ClipOneTriangle(const Eigen::Vector4d &plane, const Eigen::Matrix3d &triangle,
-                     std::list<Eigen::Matrix3d> *triangles);
-void ClipAllTriangles(const Eigen::Vector4d &plane, std::list<Eigen::Matrix3d> *triangles);
 }  // namespace renderer

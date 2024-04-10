@@ -1,12 +1,13 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <array>
 #include "Vertex.h"
 #include "Primitives.h"
-#include <array>
 namespace renderer {
 class Camera {
     using Matrix4d = Eigen::Matrix4d;
+    using Matrix34d = Eigen::Matrix<double, 3, 4>;
 
 public:
     Camera(int width, int height);
@@ -17,6 +18,7 @@ public:
 private:
     void InitPerspective();
     void InitPlanes();
+    void InitConstants(int width, int height);
 
     static constexpr double kDefaultNearPlaneDistance = 2;
 

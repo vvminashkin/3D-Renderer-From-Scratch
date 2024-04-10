@@ -28,7 +28,7 @@ public:
 
     class CameraHolder : public Camera {
     public:
-        CameraHolder(Camera);
+        CameraHolder(const Camera &);
         const Vector3d &GetCoordinates() const;
         const Quaterniond &GetAngle() const;
 

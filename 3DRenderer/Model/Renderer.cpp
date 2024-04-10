@@ -1,43 +1,49 @@
 #include "Renderer.h"
 #include "Primitives.h"
 #include <cassert>
+#include <iostream>
+
 namespace renderer {
 namespace {
 using Vector3d = Eigen::Vector3d;
-Eigen::Matrix3d TransformToScreenSpace(Eigen::Matrix3d triangle, size_t width, size_t height) {
+using Vector2d = Eigen::Vector2d;
+using Matrix2d = Eigen::Matrix2d;
+Renderer::Matrix3d TransformToScreenSpace(Renderer::Matrix3d triangle, size_t width,
+                                          size_t height) {
     assert(width != 0);
     assert(height != 0);
     double dwidth = static_cast<double>(width);
     double dheight = static_cast<double>(height);
 
-    triangle.col(0) += Eigen::Vector3d::Ones();
+    triangle.col(0) += Vector3d::Ones();
     triangle.col(0) *= dwidth / 2;
 
     triangle.col(1) = -triangle.col(1);
-    triangle.col(1) += Eigen::Vector3d::Ones();
+    triangle.col(1) += Vector3d::Ones();
     triangle.col(1) *= dheight / 2;
     return triangle;
 }
-Eigen::Matrix3d TransformToCameraSpace(Eigen::Matrix3d triangle, size_t width, size_t height) {
+Renderer::Matrix3d TransformToCameraSpace(Renderer::Matrix3d triangle, size_t width,
+                                          size_t height) {
     assert(width != 0);
     assert(height != 0);
     double dwidth = static_cast<double>(width);
     double dheight = static_cast<double>(height);
 
     triangle.col(0) /= dwidth / 2;
-    triangle.col(0) -= Eigen::Vector3d::Ones();
+    triangle.col(0) -= Vector3d::Ones();
 
     triangle.col(1) /= dheight / 2;
-    triangle.col(1) -= Eigen::Vector3d::Ones();
+    triangle.col(1) -= Vector3d::Ones();
     triangle.col(1) = -triangle.col(1);
     return triangle;
 }
-Eigen::Vector2d TransformVectorToCameraSpace(Eigen::Vector2d vec, size_t width, size_t height) {
+Vector2d TransformVectorToCameraSpace(Vector2d vec, size_t width, size_t height) {
     assert(width != 0);
     assert(height != 0);
 
-    double dwidth = static_cast<double>(width);
-    double dheight = static_cast<double>(height);
+    double dwidth = width;
+    double dheight = height;
 
     vec.x() /= dwidth / 2;
     vec.x() -= 1;
@@ -48,10 +54,10 @@ Eigen::Vector2d TransformVectorToCameraSpace(Eigen::Vector2d vec, size_t width, 
     return vec;
 }
 
-Vector3d ConvertToBarycentric(Eigen::Vector2d coordinates, const Eigen::Matrix3d &triangle) {
+Vector3d ConvertToBarycentric(Vector2d coordinates, const Renderer::Matrix3d &triangle) {
     Vector3d ans;
     coordinates -= triangle.row(2).topLeftCorner<1, 2>();
-    Eigen::Matrix2d temp;
+    Matrix2d temp;
     temp = triangle.topLeftCorner<2, 2>().transpose();
     temp.col(0) -= triangle.row(2).topLeftCorner<1, 2>();
     temp.col(1) -= triangle.row(2).topLeftCorner<1, 2>();
@@ -70,6 +76,7 @@ size_t RoundUp(double coordinate) {
     return static_cast<size_t>(std::ceil(coordinate));
 }
 };  // namespace
+
 std::unique_ptr<Screen> Renderer::Draw(const World &world, size_t width, size_t height) {
     std::unique_ptr<Screen> screen(new Screen(width, height));
     for (const auto &object : world.GetObjectsIterable()) {
@@ -84,7 +91,7 @@ void Renderer::ShiftTriangleCoordinates(const World::ObjectHolder &owner, Triang
     assert(vertices != nullptr);
     Matrix4d transformation_matrix =
         Renderer::MakeHomogeneousTransformationMatrix(owner.GetAngle(), owner.GetCoordinates());
-    Renderer::ApplyHomogeneousTransformationMatrix(transformation_matrix, &(*vertices));
+    Renderer::ApplyMatrix(transformation_matrix, &(*vertices));
 }
 
 void Renderer::ShiftTriangleToAlignCamera(const World &world, Triangle *vertices) {
@@ -92,13 +99,13 @@ void Renderer::ShiftTriangleToAlignCamera(const World &world, Triangle *vertices
     Matrix4d transformation_matrix = Renderer::MakeHomogeneousTransformationMatrix(
         world.GetCameraRotation().inverse(), -world.GetCameraPosition());
 
-    Renderer::ApplyHomogeneousTransformationMatrix(transformation_matrix, vertices);
+    Renderer::ApplyMatrix(transformation_matrix, vertices);
 }
 
 void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectHolder &owner_object,
                             const World &world, Screen *screen) {
 
-    Triangle vertices = owner_object->GetMesh().GetTriangleVertices(current);
+    Triangle vertices = owner_object->GetMesh().MakeTriangleVertices(current);
 
     ShiftTriangleCoordinates(owner_object, &vertices);
 
@@ -107,7 +114,7 @@ void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectH
         world.GetCamera().ApplyPerspectiveTransformation(
             vertices.GetVerticesHomogeniousCoordinates());
     BarycentricCoordinateSystem system(vertices, transformed_vertices);
-    std::list<Eigen::Matrix3d> triangles;
+    std::list<Matrix3d> triangles;
     triangles.push_back(vertices.GetVerticesHomogeniousCoordinates().topLeftCorner<3, 3>());
 
     for (int i = 0; i < world.GetCamera().GetClippingPlanes().rows(); ++i) {
@@ -124,10 +131,10 @@ void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectH
     // RasterizeTriangle(system, system.GetTriangle(), &screen);
 }
 void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &system,
-                                 const Eigen::Matrix3d &coordinates, Screen *screen) {
+                                 const Matrix3d &coordinates, Screen *screen) {
     size_t height = screen->GetHeight();
     size_t width = screen->GetWidth();
-    Eigen::Matrix3d screen_triangle = TransformToScreenSpace(coordinates, width, height);
+    Matrix3d screen_triangle = TransformToScreenSpace(coordinates, width, height);
     size_t min_x = -1;
     size_t min_y = -1;
     size_t max_x = 0;
@@ -145,15 +152,115 @@ void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &system,
     max_y = std::min(static_cast<size_t>(screen->GetHeight() - 1), max_y);
     for (size_t x = min_x; x <= max_x; ++x) {
         for (size_t y = min_y; y <= max_y; ++y) {
-            Eigen::Vector2d vec = {static_cast<double>(x) + 0.5, static_cast<double>(y)};
+            Vector2d vec = {static_cast<double>(x) + 0.5, static_cast<double>(y) + 0.5};
             Vector3d b_coordinate = ConvertToBarycentric(vec, screen_triangle);
             if (CheckIfInside(b_coordinate)) {
                 // TODO z-buffer
-                vec = TransformVectorToCameraSpace(vec, width, height);
-                screen->SetPixel(y, x,
-                                 system.GetColor(system.ConvertToBarycentricCoordinates(vec)));
+                Vector4d vector = system.GetTransformedCoordinates(b_coordinate);
+                double z = vector.w();
+                if (z > screen->GetZ(y, x)) {
+                    screen->SetZ(y, x, z);
+                    screen->SetPixel(y, x, system.GetColor(b_coordinate));
+                }
             }
         }
+    }
+}
+bool Renderer::DetermineSide(const Eigen::Vector4d &plane, const Eigen::Vector3d &point) {
+    assert("Plane is not zero" && (!(plane.x() == 0 && plane.y() == 0 && plane.z() == 0)));
+    Eigen::Vector3d point_on_plane = plane.topLeftCorner<3, 1>() * (-plane.w());
+    Eigen::Vector3d point_vector = point - point_on_plane;
+    double scalar_prod = plane.topLeftCorner<3, 1>().dot(point_vector);
+    return scalar_prod > 0;
+}
+Eigen::Vector3d Renderer::PlaneLineIntersection(const Eigen::Vector4d &plane,
+                                                const Eigen::Vector3d &point1,
+                                                const Eigen::Vector3d &point2) {
+    // page 98
+    Eigen::Vector3d ans;
+    Eigen::Vector3d v = point2 - point1;
+    double t = (-(plane.topLeftCorner<3, 1>().dot(point1) + plane.w())) /
+               (plane.topLeftCorner<3, 1>().dot(v));
+    ans = point1 + t * v;
+    return ans;
+}
+bool Renderer::ClipOneTriangle(const Eigen::Vector4d &plane, const Eigen::Matrix3d &triangle,
+                               std::list<Eigen::Matrix3d> *triangles) {
+    int cnt = 0;
+
+    Eigen::Matrix3d points_inside;
+    Eigen::Matrix3d points_outside;
+    for (int i = 0; i < 3; ++i) {
+        bool is_inside = DetermineSide(plane, triangle.row(i));
+        if (is_inside) {
+            ++cnt;
+            points_inside.row(cnt - 1) = triangle.row(i);
+        } else {
+            points_outside.row(i - cnt) = triangle.row(i);
+        }
+    }
+    if (cnt == 3) {
+        return false;
+    }
+    if (cnt == 0) {
+        return true;
+    }
+    if (cnt == 1) {
+        Eigen::Vector3d first_inter =
+            PlaneLineIntersection(plane, points_outside.row(0), points_inside.row(0));
+        Eigen::Vector3d second_inter =
+            PlaneLineIntersection(plane, points_outside.row(1), points_inside.row(0));
+        Eigen::Matrix3d ans;
+        ans.row(0) = first_inter;
+        ans.row(1) = second_inter;
+        ans.row(2) = points_inside.row(0);
+        triangles->push_back(ans);
+    }
+    if (cnt == 2) {
+
+        Eigen::Vector3d first_inter =
+            PlaneLineIntersection(plane, points_outside.row(0), points_inside.row(0));
+        Eigen::Vector3d second_inter =
+            PlaneLineIntersection(plane, points_outside.row(0), points_inside.row(1));
+        Eigen::Matrix3d ans1;
+        Eigen::Matrix3d ans2;
+        ans1.row(0) = first_inter;
+        ans1.row(1) = points_inside.row(0);
+        ans1.row(2) = points_inside.row(1);
+
+        ans2.row(0) = first_inter;
+        ans2.row(1) = second_inter;
+        ans2.row(2) = points_inside.row(1);
+
+        triangles->push_back(ans1);
+        triangles->push_back(ans2);
+    }
+
+    return true;
+}
+void Renderer::ClipAllTriangles(const Eigen::Vector4d &plane,
+                                std::list<Eigen::Matrix3d> *triangles) {
+    if (triangles->empty()) {
+        return;
+    }
+    auto it = triangles->end();
+    --it;
+    while (true) {
+        bool is_clipped = ClipOneTriangle(plane, *it, triangles);
+        if (is_clipped) {
+            bool is_begining = it == triangles->begin();
+            auto new_it = triangles->erase(it);
+            if (new_it == triangles->begin()) {
+                break;
+            }
+            it = new_it;
+            --it;
+            continue;
+        }
+        if (it == triangles->begin()) {
+            break;
+        }
+        --it;
     }
 }
 Renderer::Matrix4d Renderer::MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
@@ -165,14 +272,15 @@ Renderer::Matrix4d Renderer::MakeHomogeneousTransformationMatrix(const Quaternio
     transformation_matrix.col(3).topLeftCorner<3, 1>() = offset;
     return transformation_matrix;
 }
-void Renderer::ApplyHomogeneousTransformationMatrix(const Eigen::Matrix4d &transformation_matrix,
-                                                    Triangle *vertices) {
+void Renderer::ApplyMatrix(const Matrix4d &transformation_matrix, Triangle *vertices) {
     assert(vertices != nullptr);
 
     // Page 76 "Mathematics for 3D game..."
     for (auto &ver : vertices->GetVerticies()) {
-        ver.coordinates = transformation_matrix * ver.coordinates.GetHomogeneousCoordinates();
+        ver.coordinates =
+            (transformation_matrix * ver.coordinates.GetHomogeneousCoordinates()).eval();
         ver.normal = transformation_matrix * ver.normal.GetHomogeneousCoordinates();
     }
 }
+
 }  // namespace renderer
