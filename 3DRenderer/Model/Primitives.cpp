@@ -1,9 +1,11 @@
 #include "Primitives.h"
 #include <algorithm>
 #include <iostream>
+#include <cassert>
+
 namespace renderer {
 Triangle::Triangle(Matrix3d coordinates,
-                   const std::function<RGB(const Triangle &, Vector3d)> *color_function_p)
+                   const std::function<RGB(const Triangle &, const Vector3d &)> *color_function_p)
     : color_function_p_(color_function_p) {
     assert("color function is nullptr" && color_function_p);
     verticies_.x().coordinates = coordinates.row(0);
@@ -18,11 +20,11 @@ Triangle::Vector3d Triangle::CalculateCoordinatesFromBarycentric(
           verticies_.z().coordinates.GetCoordinates() * coordinates.z();
     return ans;
 }
-RGB Triangle::GetColor(Vector3d b_coordinate) const {
+RGB Triangle::GetColor(const Vector3d &b_coordinate) const {
     return (*color_function_p_)(*this, b_coordinate);
 }
 void Triangle::SetColorFunction(
-    const std::function<RGB(const Triangle &, Vector3d)> *color_function_p) {
+    const std::function<RGB(const Triangle &, const Vector3d &)> *color_function_p) {
     color_function_p_ = color_function_p;
 }
 BarycentricCoordinateSystem::BarycentricCoordinateSystem(const Triangle &original,
@@ -39,10 +41,11 @@ BarycentricCoordinateSystem::BarycentricCoordinateSystem(const Triangle &origina
         transformed_coordinates_matrix_.row(2).topLeftCorner<1, 2>();
     barycentric_transformation_matrix_.col(1) -=
         transformed_coordinates_matrix_.row(2).topLeftCorner<1, 2>();
+    barycentric_transformation_matrix_ = barycentric_transformation_matrix_.inverse();
 }
 BarycentricCoordinateSystem::Vector3d BarycentricCoordinateSystem::GetOriginalCoordinates(
     const BCoordinates &coordinates) const {
-    return original_coordinates_matrix_.topLeftCorner<3, 3>() * coordinates;
+    return coordinates.transpose() * original_coordinates_matrix_.topLeftCorner<3, 3>();
 }
 BarycentricCoordinateSystem::Vector4d BarycentricCoordinateSystem::GetTransformedCoordinates(
     const BCoordinates &coordinates) const {
@@ -75,7 +78,7 @@ double BarycentricCoordinateSystem::InterpolateZCoordinate(
     const BarycentricCoordinateSystem::BCoordinates &coordinates) {
     return transformed_coordinates_matrix_.col(3).dot(coordinates);
 }
-RGB BarycentricCoordinateSystem::GetColor(Vector3d b_coordinate) const {
+RGB BarycentricCoordinateSystem::GetColor(const Vector3d &b_coordinate) const {
     return original_.GetColor(b_coordinate);
 }
 BarycentricCoordinateSystem::Vector3d BarycentricCoordinateSystem::ConvertToBarycentricCoordinates(

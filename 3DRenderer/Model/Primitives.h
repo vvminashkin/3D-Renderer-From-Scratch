@@ -11,18 +11,18 @@ public:
     using Matrix34d = Eigen::Matrix<double, 3, 4>;
     using Matrix3d = Eigen::Matrix3d;
     Triangle() = default;
-    Triangle(Eigen::Matrix3d, const std::function<RGB(const Triangle &, Vector3d)> *);
+    Triangle(Eigen::Matrix3d, const std::function<RGB(const Triangle &, const Vector3d &)> *);
     Vector3d CalculateCoordinatesFromBarycentric(const Vector3d &) const;
     Eigen::Vector3<Vertex> &GetVerticies();
     const Eigen::Vector3<Vertex> &GetVerticies() const;
     Matrix3d GetVerticiesCoordinates() const;
     Matrix34d GetVerticesHomogeniousCoordinates() const;
-    RGB GetColor(Vector3d b_coordinate) const;
-    void SetColorFunction(const std::function<RGB(const Triangle &, Vector3d)> *);
+    RGB GetColor(const Vector3d &b_coordinate) const;
+    void SetColorFunction(const std::function<RGB(const Triangle &, const Vector3d &)> *);
 
 private:
     Eigen::Vector3<Vertex> verticies_;
-    const std::function<RGB(const Triangle &, Vector3d)> *color_function_p_ = nullptr;
+    const std::function<RGB(const Triangle &, const Vector3d &)> *color_function_p_ = nullptr;
 };
 class BarycentricCoordinateSystem {
 public:
@@ -38,7 +38,7 @@ public:
     Vector4d GetTransformedCoordinates(const BCoordinates &) const;
     Matrix3d GetTriangleCoordinates(const Eigen::Vector3<BCoordinates> &) const;
     double InterpolateZCoordinate(const BCoordinates &);
-    RGB GetColor(Vector3d b_coordinate) const;
+    RGB GetColor(const Vector3d &b_coordinate) const;
     Vector3d ConvertToBarycentricCoordinates(Eigen::Vector2d) const;
 
 private:

@@ -13,6 +13,7 @@ MainScreen::MainScreen(int width, int height)
           RecievePortType::doNothing, [this](const renderer::Screen& screen) { Draw(screen); },
           RecievePortType::doNothing),
       window_(sf::VideoMode(width, height), "renderer") {
+    window_.setKeyRepeatEnabled(false);
 }
 
 void MainScreen::Draw(const renderer::Screen& screen) {
@@ -33,7 +34,7 @@ sf::Image MainScreen::MakeImage(const renderer::Screen& screen) {
     return image;
 }
 bool MainScreen::GetEvent(sf::Event& event) {
-    return window_.waitEvent(event);
+    return window_.pollEvent(event);
 }
 MainScreen::RecievePortType* MainScreen::GetRecievePort() {
     return &recieve_port_;

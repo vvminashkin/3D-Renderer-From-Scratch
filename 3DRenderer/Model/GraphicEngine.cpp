@@ -78,4 +78,13 @@ void GraphicEngine::TestUpdateProjection() {
     current_screen_ = std::move(*screen.release());
     update_port_.notify();
 }
+void GraphicEngine::TiltCameraUp() {
+    Quaterniond camera_rotation = world_.GetCameraRotation();
+    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
+    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
+    Vector3d axis_of_rotation = direction.cross(normal);
+
+    world_.SetCameraRotation(Quaterniond(camera_rotation.matrix() *
+                                         Eigen::AngleAxisd(0.004, axis_of_rotation).matrix()));
+}
 }  // namespace kernel

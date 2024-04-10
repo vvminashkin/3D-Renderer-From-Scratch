@@ -17,15 +17,12 @@ public:
     };
 
     void AddObject(AnyObject);
-
     void AddObject(AnyObject, const Vector3d &);
-
     const Quaterniond &GetCameraRotation() const;
-
     const Vector3d &GetCameraPosition() const;
-
     const Camera &GetCamera() const;
 
+    void SetCameraRotation(const Quaterniond &);
     class CameraHolder : public Camera {
     public:
         CameraHolder(const Camera &);
@@ -34,6 +31,9 @@ public:
 
         void SetCoordinates(const Vector3d &);
         void SetAngle(const Quaterniond &);
+
+        static const Vector3d kDefaultDirection;
+        static const Vector3d kDefaultNormal;
 
     private:
         Eigen::Vector3d coordinates_ = World::GetOrigin();

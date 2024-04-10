@@ -1,7 +1,7 @@
 #include "Mesh.h"
 
 namespace renderer {
-Mesh::Mesh(std::function<RGB(const Triangle&, Vector3d)> color_function)
+Mesh::Mesh(std::function<RGB(const Triangle&, const Vector3d&)> color_function)
     : color_function_(color_function) {
 }
 Iterable<Mesh::TrianglesConstIterator> Mesh::GetTriangles() const {

@@ -98,13 +98,14 @@ void Renderer::ShiftTriangleToAlignCamera(const World &world, Triangle *vertices
     assert(vertices != nullptr);
     Matrix4d transformation_matrix = Renderer::MakeHomogeneousTransformationMatrix(
         world.GetCameraRotation().inverse(), -world.GetCameraPosition());
-
+    // std::cout<<world.GetCameraRotation()<<std::endl;
+    // std::cout<<vertices->GetVerticiesCoordinates()<<std::endl;
     Renderer::ApplyMatrix(transformation_matrix, vertices);
+    // std::cout<<vertices->GetVerticiesCoordinates()<<std::endl;
 }
 
 void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectHolder &owner_object,
                             const World &world, Screen *screen) {
-
     Triangle vertices = owner_object->GetMesh().MakeTriangleVertices(current);
 
     ShiftTriangleCoordinates(owner_object, &vertices);
@@ -116,6 +117,7 @@ void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectH
     BarycentricCoordinateSystem system(vertices, transformed_vertices);
     std::list<Matrix3d> triangles;
     triangles.push_back(vertices.GetVerticesHomogeniousCoordinates().topLeftCorner<3, 3>());
+    // std::cout<<vertices.GetVerticesHomogeniousCoordinates()<<std::endl;
 
     for (int i = 0; i < world.GetCamera().GetClippingPlanes().rows(); ++i) {
         ClipAllTriangles(world.GetCamera().GetClippingPlanes().row(i), &triangles);
@@ -153,19 +155,27 @@ void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &system,
     for (size_t x = min_x; x <= max_x; ++x) {
         for (size_t y = min_y; y <= max_y; ++y) {
             Vector2d vec = {static_cast<double>(x) + 0.5, static_cast<double>(y) + 0.5};
-            Vector3d b_coordinate = ConvertToBarycentric(vec, screen_triangle);
+            Vector3d b_coordinate = system.ConvertToBarycentricCoordinates(
+                TransformVectorToCameraSpace(vec, width, height));
             if (CheckIfInside(b_coordinate)) {
                 // TODO z-buffer
-                Vector4d vector = system.GetTransformedCoordinates(b_coordinate);
-                double z = vector.w();
-                if (z > screen->GetZ(y, x)) {
+                double z = system.GetOriginalCoordinates(b_coordinate).norm();
+                if (z >= screen->GetZ(y, x)) {
                     screen->SetZ(y, x, z);
-                    screen->SetPixel(y, x, system.GetColor(b_coordinate));
-                }
+                    RGB color = system.GetColor(b_coordinate);
+                    color.SetB(std::sin(z / 1.5));
+                    screen->SetPixel(y, x, color);
+                } /*else {
+                    if (screen->GetZ(y, x) != 0) {
+                        std::cout << z << ' ' << screen->GetZ(y, x) << std::endl;
+                        std::cout << y << ' ' << x << std::endl;
+                        screen->SetPixel(y, x, {0, 0, 1});
+                    }*/
             }
         }
     }
 }
+
 bool Renderer::DetermineSide(const Eigen::Vector4d &plane, const Eigen::Vector3d &point) {
     assert("Plane is not zero" && (!(plane.x() == 0 && plane.y() == 0 && plane.z() == 0)));
     Eigen::Vector3d point_on_plane = plane.topLeftCorner<3, 1>() * (-plane.w());

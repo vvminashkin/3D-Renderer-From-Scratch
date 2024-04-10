@@ -1,7 +1,9 @@
 #include "World.h"
+#include <iostream>
 
 namespace renderer {
-
+const World::Vector3d World::CameraHolder::kDefaultDirection{0, 0, -1};
+const World::Vector3d World::CameraHolder::kDefaultNormal{0, 1, 0};
 World::World(int width, int height) {
     Camera curr(width, height);
     cameras_.push_back(curr);
@@ -27,6 +29,9 @@ const Camera &World::GetCamera() const {
     return cameras_[current_camera_ind_];
 }
 
+void World::SetCameraRotation(const Quaterniond &rotation) {
+    cameras_[current_camera_ind_].SetAngle(rotation);
+}
 const World::Vector3d &World::CameraHolder::GetCoordinates() const {
     return coordinates_;
 }
@@ -38,6 +43,7 @@ void World::CameraHolder::SetCoordinates(const Vector3d &coordinates) {
     coordinates_ = coordinates;
 }
 void World::CameraHolder::SetAngle(const Quaterniond &angle) {
+    std::cout << "here" << std::endl;
     rotation_ = angle;
 }
 
