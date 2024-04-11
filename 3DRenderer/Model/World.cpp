@@ -32,6 +32,9 @@ const Camera &World::GetCamera() const {
 void World::SetCameraRotation(const Quaterniond &rotation) {
     cameras_[current_camera_ind_].SetAngle(rotation);
 }
+void World::SetCameraPosition(const Vector3d &position) {
+    cameras_[current_camera_ind_].SetCoordinates(position);
+}
 const World::Vector3d &World::CameraHolder::GetCoordinates() const {
     return coordinates_;
 }
@@ -43,7 +46,6 @@ void World::CameraHolder::SetCoordinates(const Vector3d &coordinates) {
     coordinates_ = coordinates;
 }
 void World::CameraHolder::SetAngle(const Quaterniond &angle) {
-    std::cout << "here" << std::endl;
     rotation_ = angle;
 }
 

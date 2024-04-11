@@ -41,17 +41,85 @@ void GraphicEngine::Subscribe(observer::CObserver<const renderer::Screen>* obs) 
     update_port_.subscribe(obs);
 }
 void GraphicEngine::TestUpdateProjection() {
-    std::unique_ptr<Screen> screen(renderer_.Draw(world_, width_, height_));
-    current_screen_ = std::move(*screen.release());
+    Screen screen(*renderer_.Draw(world_, width_, height_));
+    current_screen_ = std::move(screen);
     update_port_.notify();
 }
-void GraphicEngine::TiltCameraUp() {
+void GraphicEngine::TiltCameraUp(double shift) {
     Quaterniond camera_rotation = world_.GetCameraRotation();
     Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
     Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
     Vector3d axis_of_rotation = direction.cross(normal);
+    Quaterniond new_quatenion =
+        Quaterniond(camera_rotation.matrix() * Eigen::AngleAxisd(shift, axis_of_rotation).matrix());
+    new_quatenion.normalize();
+    world_.SetCameraRotation(new_quatenion);
+}
+void GraphicEngine::TiltCameraDown(double shift) {
+    Quaterniond camera_rotation = world_.GetCameraRotation();
+    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
+    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
+    Vector3d axis_of_rotation = direction.cross(normal);
+    Quaterniond new_quatenion = Quaterniond(camera_rotation.matrix() *
+                                            Eigen::AngleAxisd(-shift, axis_of_rotation).matrix());
+    new_quatenion.normalize();
+    world_.SetCameraRotation(new_quatenion);
+}
+void GraphicEngine::TiltCameraRight(double shift) {
+    Quaterniond camera_rotation = world_.GetCameraRotation();
+    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
+    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
+    Quaterniond new_quatenion =
+        Quaterniond(camera_rotation.matrix() * Eigen::AngleAxisd(-shift, normal).matrix());
+    new_quatenion.normalize();
+    world_.SetCameraRotation(new_quatenion);
+}
+void GraphicEngine::TiltCameraLeft(double shift) {
 
-    world_.SetCameraRotation(Quaterniond(camera_rotation.matrix() *
-                                         Eigen::AngleAxisd(0.004, axis_of_rotation).matrix()));
+    Quaterniond camera_rotation = world_.GetCameraRotation();
+    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
+    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
+    Quaterniond new_quatenion =
+        Quaterniond(camera_rotation.matrix() * Eigen::AngleAxisd(shift, normal).matrix());
+    new_quatenion.normalize();
+    world_.SetCameraRotation(new_quatenion);
+}
+void GraphicEngine::MoveCameraUp(double shift) {
+    Quaterniond camera_rotation = world_.GetCameraRotation();
+    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
+    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
+    world_.SetCameraPosition(world_.GetCameraPosition() + normal * shift);
+}
+void GraphicEngine::MoveCameraDown(double shift) {
+    Quaterniond camera_rotation = world_.GetCameraRotation();
+    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
+    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
+    world_.SetCameraPosition(world_.GetCameraPosition() - normal * shift);
+}
+void GraphicEngine::MoveCameraRight(double shift) {
+    Quaterniond camera_rotation = world_.GetCameraRotation();
+    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
+    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
+    Vector3d axis_of_rotation = direction.cross(normal);
+    world_.SetCameraPosition(world_.GetCameraPosition() + axis_of_rotation * shift);
+}
+void GraphicEngine::MoveCameraLeft(double shift) {
+    Quaterniond camera_rotation = world_.GetCameraRotation();
+    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
+    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
+    Vector3d axis_of_rotation = direction.cross(normal);
+    world_.SetCameraPosition(world_.GetCameraPosition() - axis_of_rotation * shift);
+}
+void GraphicEngine::MoveCameraForward(double shift) {
+    Quaterniond camera_rotation = world_.GetCameraRotation();
+    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
+    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
+    world_.SetCameraPosition(world_.GetCameraPosition() + direction * shift);
+}
+void GraphicEngine::MoveCameraBackward(double shift) {
+    Quaterniond camera_rotation = world_.GetCameraRotation();
+    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
+    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
+    world_.SetCameraPosition(world_.GetCameraPosition() - direction * shift);
 }
 }  // namespace kernel

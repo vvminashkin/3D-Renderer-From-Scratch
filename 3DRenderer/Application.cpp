@@ -21,13 +21,16 @@ Application::Application()
 }
 void Application::Run() {
     bool closed = false;
+    sf::Event event;
     while (!closed) {
-        sf::Event event;
-        while (view_.GetEvent(event)) {
+        if (view_.GetEvent(event)) {
+
             closed = controller_.HandleEvent(event);
             if (closed) {
                 break;
             }
+        } else {
+            controller_.HandleStallEvent();
         }
     }
 }

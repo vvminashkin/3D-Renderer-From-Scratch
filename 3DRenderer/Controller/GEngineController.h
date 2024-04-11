@@ -12,8 +12,15 @@ public:
     GEngineController(GraphicEngine* model);
     bool HandleEvent(const sf::Event&);
 
+    void HandleStallEvent();
+
 private:
-    bool HandleKeyEvent(const sf::Event::KeyEvent&);
+    bool HandleKeyPressedEvent(const sf::Event::KeyEvent&);
+    void HandleKeyReleasedEvent(const sf::Event::KeyEvent&);
+    void HandleKeys();
+    static constexpr double kDefaultRotation = 0.008;
+    static constexpr double kDefaultMove = 0.08;
+    std::list<sf::Keyboard::Key> pressed_keys_;
     GraphicEngine* model_;
 };
 

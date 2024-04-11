@@ -158,19 +158,13 @@ void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &system,
             Vector3d b_coordinate = system.ConvertToBarycentricCoordinates(
                 TransformVectorToCameraSpace(vec, width, height));
             if (CheckIfInside(b_coordinate)) {
-                // TODO z-buffer
                 double z = system.GetOriginalCoordinates(b_coordinate).norm();
                 if (z >= screen->GetZ(y, x)) {
                     screen->SetZ(y, x, z);
                     RGB color = system.GetColor(b_coordinate);
                     color.SetB(std::sin(z / 1.5));
                     screen->SetPixel(y, x, color);
-                } /*else {
-                    if (screen->GetZ(y, x) != 0) {
-                        std::cout << z << ' ' << screen->GetZ(y, x) << std::endl;
-                        std::cout << y << ' ' << x << std::endl;
-                        screen->SetPixel(y, x, {0, 0, 1});
-                    }*/
+                }
             }
         }
     }

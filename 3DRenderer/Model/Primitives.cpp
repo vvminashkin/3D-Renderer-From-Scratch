@@ -41,7 +41,7 @@ BarycentricCoordinateSystem::BarycentricCoordinateSystem(const Triangle &origina
         transformed_coordinates_matrix_.row(2).topLeftCorner<1, 2>();
     barycentric_transformation_matrix_.col(1) -=
         transformed_coordinates_matrix_.row(2).topLeftCorner<1, 2>();
-    barycentric_transformation_matrix_ = barycentric_transformation_matrix_.inverse();
+    barycentric_transformation_matrix_ = barycentric_transformation_matrix_.inverse().eval();
 }
 BarycentricCoordinateSystem::Vector3d BarycentricCoordinateSystem::GetOriginalCoordinates(
     const BCoordinates &coordinates) const {

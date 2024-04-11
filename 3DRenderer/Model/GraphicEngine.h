@@ -12,7 +12,17 @@ public:
     using Quaterniond = Eigen::Quaterniond;
     using Vector3d = Eigen::Vector3d;
     GraphicEngine(int width, int height);
-    void TiltCameraUp();
+    void TiltCameraUp(double shift);
+    void TiltCameraDown(double shift);
+    void TiltCameraRight(double shift);
+    void TiltCameraLeft(double shift);
+
+    void MoveCameraUp(double shift);
+    void MoveCameraDown(double shift);
+    void MoveCameraRight(double shift);
+    void MoveCameraLeft(double shift);
+    void MoveCameraForward(double shift);
+    void MoveCameraBackward(double shift);
 
     void Subscribe(observer::CObserver<const Screen>* obs);
     void TestUpdateProjection();

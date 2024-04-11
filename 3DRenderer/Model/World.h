@@ -23,6 +23,8 @@ public:
     const Camera &GetCamera() const;
 
     void SetCameraRotation(const Quaterniond &);
+    void SetCameraPosition(const Vector3d &);
+
     class CameraHolder : public Camera {
     public:
         CameraHolder(const Camera &);
