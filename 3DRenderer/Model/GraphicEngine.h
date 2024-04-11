@@ -15,7 +15,6 @@ public:
     void TiltCameraUp();
 
     void Subscribe(observer::CObserver<const Screen>* obs);
-    void TestUpdateRasterization();
     void TestUpdateProjection();
 
 private:
