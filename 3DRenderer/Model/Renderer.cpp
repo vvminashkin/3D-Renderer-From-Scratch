@@ -97,7 +97,8 @@ void Renderer::ShiftTriangleCoordinates(const World::ObjectHolder &owner, Triang
 void Renderer::ShiftTriangleToAlignCamera(const World &world, Triangle *vertices) {
     assert(vertices != nullptr);
     Matrix4d transformation_matrix = Renderer::MakeHomogeneousTransformationMatrix(
-        world.GetCameraRotation().inverse(), -world.GetCameraPosition());
+        world.GetCameraRotation().inverse(),
+        world.GetCameraRotation().inverse() * -world.GetCameraPosition());
     // std::cout<<world.GetCameraRotation()<<std::endl;
     // std::cout<<vertices->GetVerticiesCoordinates()<<std::endl;
     Renderer::ApplyMatrix(transformation_matrix, vertices);
@@ -159,10 +160,10 @@ void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &system,
                 TransformVectorToCameraSpace(vec, width, height));
             if (CheckIfInside(b_coordinate)) {
                 double z = system.GetOriginalCoordinates(b_coordinate).norm();
-                if (z >= screen->GetZ(y, x)) {
+                if (screen->GetZ(y, x) == 0 || z <= screen->GetZ(y, x)) {
                     screen->SetZ(y, x, z);
                     RGB color = system.GetColor(b_coordinate);
-                    color.SetB(std::sin(z / 1.5));
+                    color.SetB(std::sin(b_coordinate.maxCoeff() * 10));
                     screen->SetPixel(y, x, color);
                 }
             }
