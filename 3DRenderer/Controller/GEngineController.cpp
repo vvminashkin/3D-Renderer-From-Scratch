@@ -113,6 +113,8 @@ void GEngineController::HandleKeys() {
                 break;
         }
     }
-    model_->TestUpdateProjection();
+    if (!pressed_keys_.empty()) {
+        model_->TestUpdateProjection();
+    }
 }
 }  // namespace interface

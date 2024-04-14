@@ -77,16 +77,17 @@ size_t RoundUp(double coordinate) {
 }
 };  // namespace
 
-std::unique_ptr<Screen> Renderer::Draw(const World &world, size_t width, size_t height) {
-    std::unique_ptr<Screen> screen(new Screen(width, height));
-    for (const auto &object : world.GetObjectsIterable()) {
-        for (const auto &triangle : object->GetMesh().GetTriangles()) {
-            DrawTriangle(triangle, object, world, screen.get());
-        }
+void Renderer::ShiftLightToAlignCamera(const World &world, LightSourcesDescription *desc) {
+    Matrix34d transformation_matrix = Renderer::MakeHomogeneousTransformationMatrix(
+        world.GetCameraRotation().inverse(),
+        world.GetCameraRotation().inverse() * -world.GetCameraPosition());
+    for (int i = 0; i < world.GetPointLightSources().size(); ++i) {
+        Vector4d temp = Vector4d::Ones();
+        temp.topLeftCorner<3, 1>() = world.GetPointLightSources()[i].GetCoordinates();
+        desc->point_light_coordinates_.push_back(transformation_matrix * temp);
+        // std::cout<<(transformation_matrix*temp).transpose()<<'b'<<i<<std::endl;
     }
-    return screen;
 }
-
 void Renderer::ShiftTriangleCoordinates(const World::ObjectHolder &owner, Triangle *vertices) {
     assert(vertices != nullptr);
     Matrix34d transformation_matrix =
@@ -102,11 +103,24 @@ void Renderer::ShiftTriangleToAlignCamera(const World &world, Triangle *vertices
     // std::cout<<world.GetCameraRotation()<<std::endl;
     // std::cout<<vertices->GetVerticiesCoordinates()<<std::endl;
     Renderer::ApplyMatrix(transformation_matrix, vertices);
-    // std::cout<<vertices->GetVerticiesCoordinates()<<std::endl;
+    // std::cout<<vertices->GetVerticiesCoordinates().row(0)<<std::endl;
+    //  std::cout<<vertices->GetVerticiesCoordinates()<<std::endl;
 }
 
+std::unique_ptr<Screen> Renderer::Draw(const World &world, size_t width, size_t height) {
+    std::unique_ptr<Screen> screen(new Screen(width, height));
+    LightSourcesDescription light_desc;
+    ShiftLightToAlignCamera(world, &light_desc);
+    for (const auto &object : world.GetObjectsIterable()) {
+        for (const auto &triangle : object->GetMesh().GetTriangles()) {
+            DrawTriangle(triangle, object, world, light_desc, screen.get());
+        }
+    }
+    return screen;
+}
 void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectHolder &owner_object,
-                            const World &world, Screen *screen) {
+                            const World &world, const LightSourcesDescription &light_desc,
+                            Screen *screen) {
     Triangle vertices = owner_object->GetMesh().MakeTriangleVertices(current);
     ShiftTriangleCoordinates(owner_object, &vertices);
 
@@ -114,6 +128,7 @@ void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectH
     Eigen::Matrix<double, 3, 4> transformed_vertices =
         world.GetCamera().ApplyPerspectiveTransformation(
             vertices.GetVerticesHomogeniousCoordinates());
+    vertices.CalculateNorm();
     BarycentricCoordinateSystem system(vertices, transformed_vertices);
     std::list<Matrix3d> triangles;
     triangles.push_back(vertices.GetVerticesHomogeniousCoordinates().topLeftCorner<3, 3>());
@@ -128,12 +143,15 @@ void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectH
         homogeneous_coords.topLeftCorner<3, 3>() = curr;
         homogeneous_coords.col(3) = Vector3d::Ones();
         homogeneous_coords = world.GetCamera().ApplyPerspectiveTransformation(homogeneous_coords);
-        RasterizeTriangle(system, homogeneous_coords.topLeftCorner<3, 3>(), screen);
+        RasterizeTriangle(system, homogeneous_coords.topLeftCorner<3, 3>(), world, light_desc,
+                          screen);
     }
+    std::cout.flush();
     // RasterizeTriangle(system, system.GetTriangle(), &screen);
 }
 void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &system,
-                                 const Matrix3d &coordinates, Screen *screen) {
+                                 const Matrix3d &coordinates, const World &world,
+                                 const LightSourcesDescription &desc, Screen *screen) {
     size_t height = screen->GetHeight();
     size_t width = screen->GetWidth();
     Matrix3d screen_triangle = TransformToScreenSpace(coordinates, width, height);
@@ -179,9 +197,10 @@ void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &system,
             double real_z_inv = (b_coordinate.dot(inv_z_coords));
             new_b_coordinate = (1 / real_z_inv) * new_b_coordinate.cwiseProduct(inv_z_coords);
             RGB color = system.GetColor(new_b_coordinate);
-            color.SetB(1 + 0.5 * std::sin(new_b_coordinate.maxCoeff() * 8));
-            color.SetG(1 + 0.5 * std::cos(new_b_coordinate.maxCoeff() * 8));
-            screen->SetPixel(y, x, color);
+
+            screen->SetPixel(y, x,
+                             CalculateBlinnPhong(color, desc, world, new_b_coordinate,
+                                                 system.GetOriginalTriangle()));
         }
     }
 }
@@ -282,6 +301,35 @@ void Renderer::ClipAllTriangles(const Eigen::Vector4d &plane,
         }
         --it;
     }
+}
+RGB Renderer::CalculateBlinnPhong(const RGB &initial_color, const LightSourcesDescription &desc,
+                                  const World &world, const Vector3d &b_coordinates,
+                                  const Triangle &triangle) {
+    RGB ans{0, 0, 0};
+    Vector3d position = b_coordinates.transpose() * triangle.GetVerticiesCoordinates();
+    Vector3d normal = triangle.GetNormal(b_coordinates);
+    RGB diffusion = CalculateBlinnPhongDiffusion(initial_color, desc, world, position, normal);
+    return diffusion;
+}
+RGB Renderer::CalculateBlinnPhongDiffusion(const RGB &initial_color,
+                                           const LightSourcesDescription &desc, const World &world,
+                                           const Vector3d &coordinates, const Vector3d &normal) {
+    RGB ans = {0, 0, 0};
+    for (const auto &light : world.GetAmbientLightSources()) {
+        ans += initial_color * light.GetIntencity();
+    }
+    for (int i = 0; i < world.GetPointLightSources().size(); ++i) {
+        Vector3d direction = (desc.point_light_coordinates_[i] - coordinates).eval().normalized();
+        const auto &light = world.GetPointLightSources()[i];
+        ans += light.GetColor() *
+               (light.GetIntencity((coordinates - desc.point_light_coordinates_[i]).norm()) *
+                std::max(std::abs(direction.dot(normal)) *
+                             (-1 + 2 * std::signbit(normal.dot(-coordinates))) *
+                             (-1 + 2 * std::signbit(normal.dot(direction))),
+                         0.0));
+    }
+
+    return ans;
 }
 Renderer::Matrix34d Renderer::MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
                                                                   const Vector3d &offset) {

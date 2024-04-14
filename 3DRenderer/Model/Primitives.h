@@ -18,11 +18,15 @@ public:
     Matrix3d GetVerticiesCoordinates() const;
     Matrix34d GetVerticesHomogeniousCoordinates() const;
     RGB GetColor(const Vector3d &b_coordinate) const;
+    Vector3d GetNormal(const Vector3d &b_coordinate) const;
     void SetColorFunction(const std::function<RGB(const Triangle &, const Vector3d &)> *);
+    void CalculateNorm();
 
 private:
     Eigen::Vector3<Vertex> verticies_;
+    Eigen::Vector3d normal_;
     const std::function<RGB(const Triangle &, const Vector3d &)> *color_function_p_ = nullptr;
+    const std::function<Vector3d(const Triangle &, const Vector3d &)> *normal_function_p_ = nullptr;
 };
 class BarycentricCoordinateSystem {
 public:
@@ -47,6 +51,7 @@ public:
     RGB GetColor(const Vector3d &b_coordinate) const;
     Vector3d ConvertToBarycentricCoordinates(Eigen::Vector2d) const;
     const Matrix34d &GetOriginalCoordinatesMatrix() const;
+    const Triangle &GetOriginalTriangle() const;
 
 private:
     Triangle original_;

@@ -16,6 +16,12 @@ void World::AddObject(AnyObject object, const Eigen::Vector3d &global_coordinate
     objects_.emplace_back(std::move(object), global_coordinates,
                           Eigen::AngleAxis<double>(0, Eigen::Vector3d::UnitX()));
 }
+void World::AddAmbientLight() {
+    ambient_lights_.emplace_back();
+}
+void World::AddPointLight(const Vector3d &coordinates) {
+    point_lights_.emplace_back(coordinates);
+}
 World::Vector3d World::GetOrigin() {
     return {0, 0, 0};
 }
@@ -27,6 +33,12 @@ const World::Vector3d &World::GetCameraPosition() const {
 }
 const Camera &World::GetCamera() const {
     return cameras_[current_camera_ind_];
+}
+const std::vector<AmbientLightSource> &World::GetAmbientLightSources() const {
+    return ambient_lights_;
+}
+const std::vector<World::TLightHolder<PointLightSource>> &World::GetPointLightSources() const {
+    return point_lights_;
 }
 
 void World::SetCameraRotation(const Quaterniond &rotation) {

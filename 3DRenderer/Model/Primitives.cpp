@@ -27,6 +27,19 @@ void Triangle::SetColorFunction(
     const std::function<RGB(const Triangle &, const Vector3d &)> *color_function_p) {
     color_function_p_ = color_function_p;
 }
+void Triangle::CalculateNorm() {
+    normal_ =
+        (verticies_[0].coordinates.GetCoordinates() - verticies_[1].coordinates.GetCoordinates())
+            .cross(verticies_[0].coordinates.GetCoordinates() -
+                   verticies_[2].coordinates.GetCoordinates())
+            .normalized();
+}
+Triangle::Vector3d Triangle::GetNormal(const Vector3d &b_coordinate) const {
+    if (!normal_function_p_) {
+        return normal_;
+    }
+    return (*normal_function_p_)(*this, b_coordinate);
+}
 BarycentricCoordinateSystem::BarycentricCoordinateSystem(const Triangle &original,
                                                          const Matrix34d &transformed)
     : original_(original), transformed_coordinates_matrix_(transformed) {
@@ -113,5 +126,8 @@ Triangle::Matrix34d Triangle::GetVerticesHomogeniousCoordinates() const {
 const BarycentricCoordinateSystem::Matrix34d &
 BarycentricCoordinateSystem::GetOriginalCoordinatesMatrix() const {
     return original_coordinates_matrix_;
+}
+const Triangle &BarycentricCoordinateSystem::GetOriginalTriangle() const {
+    return original_;
 }
 }  // namespace renderer

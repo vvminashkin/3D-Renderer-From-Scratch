@@ -9,14 +9,25 @@ namespace renderer {
 class RGB {
 public:
     using Vector3d = Eigen::Vector3d;
-    RGB(std::initializer_list<double>);
-    RGB();
+
+    RGB(std::initializer_list<double> init) : val_{init} {
+    }
+    RGB() : val_{{0.0, 0.0, 0.0}} {
+    }
     double GetR() const;
     void SetR(double);
     double GetG() const;
     void SetG(double);
     double GetB() const;
     void SetB(double);
+
+    RGB operator+(const RGB &other) const;
+    RGB operator*(const RGB &other) const;
+    RGB operator*(double a) const;
+
+    RGB &operator+=(const RGB &other);
+    RGB &operator*=(const RGB &other);
+    RGB &operator*=(double a);
 
     uint8_t GetRi() const;
     uint8_t GetGi() const;

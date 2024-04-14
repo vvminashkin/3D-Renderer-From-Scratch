@@ -26,9 +26,17 @@ GraphicEngine::GraphicEngine(int width, int height)
         return {0, 1, 0};
     });
     Eigen::Matrix3d test_triangle1;
-    test_triangle1 << -0.13, 0.27, -3.15, 2.77, 1.39, -9.45, -2, -2, -12;
+    test_triangle1 << 2.77, 1.39, -9.45, -0.13, 0.27, -3.15, -2, -2, -12;
+    renderer::BasicObject objectlight(
+        [](const renderer::Triangle&, Eigen::Vector3d) -> renderer::RGB {
+            return {10, 10, 10};
+        });
     object1.AddTriangle(test_triangle1);
+    world_.AddAmbientLight();
+    world_.AddPointLight({0.4, -0.3, -4.9});
+    objectlight.AddTriangle(world_.GetPointLightSources()[0].GetSmallTriangle());
     world_.AddObject(object1);
+    world_.AddObject(objectlight);
 }
 
 const renderer::Screen& GraphicEngine::GetCurrentScreen() {

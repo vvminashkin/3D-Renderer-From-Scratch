@@ -2,14 +2,6 @@
 #include <cassert>
 
 namespace renderer {
-RGB::RGB(std::initializer_list<double> init) {
-    size_t i = 0;
-    for (double num : init) {
-        assert(i != 3);
-        val_[i] = num;
-        ++i;
-    }
-}
 double renderer::RGB::GetR() const {
     return val_(0);
 }
@@ -29,7 +21,7 @@ void renderer::RGB::SetB(double val) {
     val_(2) = val;
 }
 uint8_t RGB::DoubleToInt(double val) {
-    return std::max(static_cast<uint8_t>(val * 255.0), uint8_t{0});
+    return std::min(std::max(static_cast<uint32_t>(val * 255.0), uint32_t{0}), uint32_t{255});
 }
 uint8_t RGB::GetRi() const {
     return DoubleToInt(GetR());
@@ -42,7 +34,32 @@ uint8_t RGB::GetBi() const {
 
     return DoubleToInt(GetB());
 }
-RGB::RGB() : val_(Vector3d::Zero()) {
+RGB RGB::operator+(const RGB& other) const {
+    RGB ans = *this;
+    ans.val_ += other.val_;
+    return ans;
+}
+RGB RGB::operator*(const RGB& other) const {
+    RGB ans = *this;
+    ans.val_.cwiseProduct(other.val_);
+    return ans;
+}
+RGB RGB::operator*(double a) const {
+    RGB ans = *this;
+    ans.val_ *= a;
+    return ans;
+}
+RGB& RGB::operator+=(const RGB& other) {
+    this->val_ += other.val_;
+    return *this;
+}
+RGB& RGB::operator*=(const RGB& other) {
+    val_ = this->val_.cwiseProduct(other.val_);
+    return *this;
+}
+RGB& RGB::operator*=(double a) {
+    val_ *= a;
+    return *this;
 }
 Direction::Direction(const Vector3d& vec) : data_(vec) {
 }

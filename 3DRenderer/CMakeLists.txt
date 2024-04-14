@@ -21,6 +21,8 @@ add_executable(${PROJECT_NAME} main.cpp
         View/MainScreen.cpp
         Controller/GEngineController.cpp
         Application.cpp
+        Model/Light/AmbientLight.cpp
+        Model/Light/PointLight.cpp
         #tags
 )
 target_link_libraries(${PROJECT_NAME} sfml-graphics )
