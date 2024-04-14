@@ -13,6 +13,7 @@ public:
     Camera(int width, int height);
     Eigen::Matrix<double, 3, 4> ApplyPerspectiveTransformation(
         const Eigen::Matrix<double, 3, 4> &) const;
+    Eigen::Vector4d ApplyInversePerspectiveTransformation(const Eigen::Vector4d &) const;
     const Eigen::Matrix<double, 5, 4> &GetClippingPlanes() const;
 
 private:
@@ -25,6 +26,7 @@ private:
     Eigen::Matrix<double, 5, 4> planes_;
     double r_, l_, t_, b_;  // not sure what are these
     Matrix4d perspective_matrix_ = Matrix4d::Zero();
+    Matrix4d inverse_prespective_matrix_ = Matrix4d::Zero();
     double near_plane_distance_ = kDefaultNearPlaneDistance;
     double fov_ = -1;
 

@@ -28,10 +28,16 @@ class BarycentricCoordinateSystem {
 public:
     using Vector3d = Eigen::Vector3d;
     using Vector4d = Eigen::Vector4d;
+    using Vector2d = Eigen::Vector2d;
     using BCoordinates = Vector3d;
     using Matrix34d = Eigen::Matrix<double, 3, 4>;
     using Matrix2d = Eigen::Matrix2d;
     using Matrix3d = Eigen::Matrix3d;
+
+    static Matrix2d MakeBarycentricTransformationMatrix(const Matrix3d &coordinates);
+
+    static Vector3d TransformToBarycentric(const Matrix2d &transform_matrix,
+                                           const Matrix3d &coordinates, const Vector2d &point);
 
     BarycentricCoordinateSystem(const Triangle &original, const Matrix34d &transformed);
     Vector3d GetOriginalCoordinates(const BCoordinates &) const;
@@ -40,6 +46,7 @@ public:
     double InterpolateZCoordinate(const BCoordinates &);
     RGB GetColor(const Vector3d &b_coordinate) const;
     Vector3d ConvertToBarycentricCoordinates(Eigen::Vector2d) const;
+    const Matrix34d &GetOriginalCoordinatesMatrix() const;
 
 private:
     Triangle original_;

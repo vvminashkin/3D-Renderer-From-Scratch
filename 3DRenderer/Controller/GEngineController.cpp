@@ -8,7 +8,7 @@ GEngineController::GEngineController(GraphicEngine* model) : model_(model) {
 }
 
 bool GEngineController::HandleEvent(const sf::Event& event) {
-    std::cout << event.type << std::endl;
+    // std::cout << event.type << std::endl;
     switch (event.type) {
         case sf::Event::Closed:
             return true;
@@ -27,9 +27,6 @@ void GEngineController::HandleStallEvent() {
     HandleKeys();
 }
 bool GEngineController::HandleKeyPressedEvent(const sf::Event::KeyEvent& event) {
-
-    // std::cout<<event.code<<std::endl;
-    // TODO holding key
     switch (event.code) {
 
         case sf::Keyboard::Escape:
@@ -73,9 +70,10 @@ void GEngineController::HandleKeyReleasedEvent(const sf::Event::KeyEvent& event)
     auto it = pressed_keys_.begin();
     while (it != pressed_keys_.end()) {
         if (*it == event.code) {
-            pressed_keys_.remove(*it);
+            pressed_keys_.erase(it);
             break;
         }
+        ++it;
     }
 }
 void GEngineController::HandleKeys() {
@@ -83,47 +81,38 @@ void GEngineController::HandleKeys() {
         switch (key) {
             case sf::Keyboard::Up:
                 model_->TiltCameraUp(kDefaultRotation);
-                model_->TestUpdateProjection();
                 break;
             case sf::Keyboard::Down:
                 model_->TiltCameraDown(kDefaultRotation);
-                model_->TestUpdateProjection();
                 break;
             case sf::Keyboard::Right:
                 model_->TiltCameraRight(kDefaultRotation);
-                model_->TestUpdateProjection();
                 break;
             case sf::Keyboard::Left:
                 model_->TiltCameraLeft(kDefaultRotation);
-                model_->TestUpdateProjection();
                 break;
             case sf::Keyboard::Space:
                 model_->MoveCameraUp(kDefaultMove);
-                model_->TestUpdateProjection();
                 break;
             case sf::Keyboard::Z:
                 model_->MoveCameraDown(kDefaultMove);
-                model_->TestUpdateProjection();
                 break;
             case sf::Keyboard::W:
                 model_->MoveCameraForward(kDefaultMove);
-                model_->TestUpdateProjection();
                 break;
             case sf::Keyboard::S:
                 model_->MoveCameraBackward(kDefaultMove);
-                model_->TestUpdateProjection();
                 break;
             case sf::Keyboard::D:
                 model_->MoveCameraRight(kDefaultMove);
-                model_->TestUpdateProjection();
                 break;
             case sf::Keyboard::A:
                 model_->MoveCameraLeft(kDefaultMove);
-                model_->TestUpdateProjection();
                 break;
             default:
                 break;
         }
     }
+    model_->TestUpdateProjection();
 }
 }  // namespace interface

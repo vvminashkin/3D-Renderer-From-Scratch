@@ -3,6 +3,7 @@
 //
 #include <cassert>
 #include "Camera.h"
+
 namespace renderer {
 Camera::Camera(int width, int height) {
     InitConstants(width, height);
@@ -18,6 +19,11 @@ Camera::Matrix34d Camera::ApplyPerspectiveTransformation(const Camera::Matrix34d
     }
     return ans;
 }
+Eigen::Vector4d Camera::ApplyInversePerspectiveTransformation(const Eigen::Vector4d& vec) const {
+    Eigen::Vector4d ans = vec;
+    ans.topLeftCorner<3, 1>() *= ans.w();
+    return inverse_prespective_matrix_ * ans;
+}
 const Eigen::Matrix<double, 5, 4>& Camera::GetClippingPlanes() const {
     return planes_;
 }
@@ -31,6 +37,7 @@ void renderer::Camera::InitPerspective() {
     perspective_matrix_(2, 2) = -1;
     perspective_matrix_(2, 3) = -2.0 * near_plane_distance_;
     perspective_matrix_(3, 2) = -1;
+    inverse_prespective_matrix_ = perspective_matrix_.inverse();
 }
 void Camera::InitPlanes() {
     // Table 5.1 mathematics for 3d game...

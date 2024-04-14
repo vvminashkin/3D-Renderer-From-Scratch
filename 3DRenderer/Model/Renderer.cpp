@@ -89,14 +89,14 @@ std::unique_ptr<Screen> Renderer::Draw(const World &world, size_t width, size_t 
 
 void Renderer::ShiftTriangleCoordinates(const World::ObjectHolder &owner, Triangle *vertices) {
     assert(vertices != nullptr);
-    Matrix4d transformation_matrix =
+    Matrix34d transformation_matrix =
         Renderer::MakeHomogeneousTransformationMatrix(owner.GetAngle(), owner.GetCoordinates());
     Renderer::ApplyMatrix(transformation_matrix, &(*vertices));
 }
 
 void Renderer::ShiftTriangleToAlignCamera(const World &world, Triangle *vertices) {
     assert(vertices != nullptr);
-    Matrix4d transformation_matrix = Renderer::MakeHomogeneousTransformationMatrix(
+    Matrix34d transformation_matrix = Renderer::MakeHomogeneousTransformationMatrix(
         world.GetCameraRotation().inverse(),
         world.GetCameraRotation().inverse() * -world.GetCameraPosition());
     // std::cout<<world.GetCameraRotation()<<std::endl;
@@ -108,7 +108,6 @@ void Renderer::ShiftTriangleToAlignCamera(const World &world, Triangle *vertices
 void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectHolder &owner_object,
                             const World &world, Screen *screen) {
     Triangle vertices = owner_object->GetMesh().MakeTriangleVertices(current);
-
     ShiftTriangleCoordinates(owner_object, &vertices);
 
     ShiftTriangleToAlignCamera(world, &vertices);
@@ -138,6 +137,9 @@ void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &system,
     size_t height = screen->GetHeight();
     size_t width = screen->GetWidth();
     Matrix3d screen_triangle = TransformToScreenSpace(coordinates, width, height);
+    Matrix2d inverse_matrix =
+        BarycentricCoordinateSystem::MakeBarycentricTransformationMatrix(coordinates);
+
     size_t min_x = -1;
     size_t min_y = -1;
     size_t max_x = 0;
@@ -153,20 +155,33 @@ void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &system,
            max_y < 2 * screen->GetHeight());
     max_x = std::min(static_cast<size_t>(screen->GetWidth() - 1), max_x);
     max_y = std::min(static_cast<size_t>(screen->GetHeight() - 1), max_y);
+
+    Vector3d inv_z_coords = system.GetOriginalCoordinatesMatrix().col(2).cwiseInverse();
     for (size_t x = min_x; x <= max_x; ++x) {
         for (size_t y = min_y; y <= max_y; ++y) {
-            Vector2d vec = {static_cast<double>(x) + 0.5, static_cast<double>(y) + 0.5};
-            Vector3d b_coordinate = system.ConvertToBarycentricCoordinates(
-                TransformVectorToCameraSpace(vec, width, height));
-            if (CheckIfInside(b_coordinate)) {
-                double z = system.GetOriginalCoordinates(b_coordinate).norm();
-                if (screen->GetZ(y, x) == 0 || z <= screen->GetZ(y, x)) {
-                    screen->SetZ(y, x, z);
-                    RGB color = system.GetColor(b_coordinate);
-                    color.SetB(std::sin(b_coordinate.maxCoeff() * 10));
-                    screen->SetPixel(y, x, color);
-                }
+            Vector2d point_screen_space = {static_cast<double>(x) + 0.5,
+                                           static_cast<double>(y) + 0.5};
+            Vector2d point_camera_space =
+                TransformVectorToCameraSpace(point_screen_space, width, height);
+            Vector3d b_local_coordinates = BarycentricCoordinateSystem::TransformToBarycentric(
+                inverse_matrix, coordinates, point_camera_space);
+            if (!CheckIfInside(b_local_coordinates)) {
+                continue;
             }
+            Vector3d b_coordinate = system.ConvertToBarycentricCoordinates(point_camera_space);
+            double z = system.GetTransformedCoordinates(b_coordinate).z();
+            // double z = system.GetOriginalCoordinates(b_coordinate).norm();
+            if (screen->GetZ(y, x) != 0 && z >= screen->GetZ(y, x)) {
+                continue;
+            }
+            screen->SetZ(y, x, z);
+            Vector3d new_b_coordinate = b_coordinate;
+            double real_z_inv = (b_coordinate.dot(inv_z_coords));
+            new_b_coordinate = (1 / real_z_inv) * new_b_coordinate.cwiseProduct(inv_z_coords);
+            RGB color = system.GetColor(new_b_coordinate);
+            color.SetB(1 + 0.5 * std::sin(new_b_coordinate.maxCoeff() * 8));
+            color.SetG(1 + 0.5 * std::cos(new_b_coordinate.maxCoeff() * 8));
+            screen->SetPixel(y, x, color);
         }
     }
 }
@@ -268,22 +283,21 @@ void Renderer::ClipAllTriangles(const Eigen::Vector4d &plane,
         --it;
     }
 }
-Renderer::Matrix4d Renderer::MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
-                                                                 const Vector3d &offset) {
+Renderer::Matrix34d Renderer::MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
+                                                                  const Vector3d &offset) {
 
-    Matrix4d transformation_matrix = Matrix4d::Zero();
+    Matrix34d transformation_matrix = Matrix34d::Zero();
     transformation_matrix.topLeftCorner<3, 3>() = rotation.toRotationMatrix();
-    transformation_matrix(3, 3) = 1;
+    // transformation_matrix(3, 3) = 1;
     transformation_matrix.col(3).topLeftCorner<3, 1>() = offset;
     return transformation_matrix;
 }
-void Renderer::ApplyMatrix(const Matrix4d &transformation_matrix, Triangle *vertices) {
+void Renderer::ApplyMatrix(const Matrix34d &transformation_matrix, Triangle *vertices) {
     assert(vertices != nullptr);
 
     // Page 76 "Mathematics for 3D game..."
     for (auto &ver : vertices->GetVerticies()) {
-        ver.coordinates =
-            (transformation_matrix * ver.coordinates.GetHomogeneousCoordinates()).eval();
+        ver.coordinates = (transformation_matrix * ver.coordinates.GetHomogeneousCoordinates());
         ver.normal = transformation_matrix * ver.normal.GetHomogeneousCoordinates();
     }
 }

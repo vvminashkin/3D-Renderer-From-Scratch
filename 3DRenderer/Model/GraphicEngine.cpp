@@ -13,9 +13,7 @@ GraphicEngine::GraphicEngine(int width, int height)
     : width_(width),
       height_(height),
       current_screen_(width, height),
-      update_port_([this]() -> std::reference_wrapper<const renderer::Screen> {
-          return this->current_screen_;
-      }),
+      update_port_([this]() -> PortReturnType { return this->current_screen_; }),
       world_(width, height) {
     renderer::BasicObject object([](const renderer::Triangle&, Eigen::Vector3d) -> renderer::RGB {
         return {1, 0, 0};
@@ -31,13 +29,6 @@ GraphicEngine::GraphicEngine(int width, int height)
     test_triangle1 << -0.13, 0.27, -3.15, 2.77, 1.39, -9.45, -2, -2, -12;
     object1.AddTriangle(test_triangle1);
     world_.AddObject(object1);
-    renderer::BasicObject object2([](const renderer::Triangle&, Eigen::Vector3d) -> renderer::RGB {
-        return {0, 1, 0};
-    });
-    Eigen::Matrix3d test_triangle2;
-    test_triangle2 << -0.13, 0.27, 3.15, 2.77, 1.39, 9.45, -2, -2, 12;
-    object2.AddTriangle(test_triangle2);
-    world_.AddObject(object2);
 }
 
 const renderer::Screen& GraphicEngine::GetCurrentScreen() {

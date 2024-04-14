@@ -1,4 +1,5 @@
 #include "Screen.h"
+#include <iostream>
 
 namespace renderer {
 Screen::Screen(size_t width, size_t height)

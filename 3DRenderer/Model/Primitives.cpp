@@ -36,12 +36,7 @@ BarycentricCoordinateSystem::BarycentricCoordinateSystem(const Triangle &origina
     }
 
     barycentric_transformation_matrix_ =
-        transformed_coordinates_matrix_.topLeftCorner<2, 2>().transpose();
-    barycentric_transformation_matrix_.col(0) -=
-        transformed_coordinates_matrix_.row(2).topLeftCorner<1, 2>();
-    barycentric_transformation_matrix_.col(1) -=
-        transformed_coordinates_matrix_.row(2).topLeftCorner<1, 2>();
-    barycentric_transformation_matrix_ = barycentric_transformation_matrix_.inverse().eval();
+        MakeBarycentricTransformationMatrix(transformed_coordinates_matrix_.topLeftCorner<3, 3>());
 }
 BarycentricCoordinateSystem::Vector3d BarycentricCoordinateSystem::GetOriginalCoordinates(
     const BCoordinates &coordinates) const {
@@ -64,6 +59,25 @@ Triangle::Matrix3d Triangle::GetVerticiesCoordinates() const {
     ans.row(0) = verticies_.x().coordinates.GetCoordinates();
     ans.row(1) = verticies_.y().coordinates.GetCoordinates();
     ans.row(2) = verticies_.z().coordinates.GetCoordinates();
+    return ans;
+}
+BarycentricCoordinateSystem::Matrix2d
+BarycentricCoordinateSystem::MakeBarycentricTransformationMatrix(const Matrix3d &coordinates) {
+    Matrix2d inverse_matrix;
+    inverse_matrix = coordinates.topLeftCorner<2, 2>().transpose();
+    inverse_matrix.col(0) -= coordinates.row(2).topLeftCorner<1, 2>();
+    inverse_matrix.col(1) -= coordinates.row(2).topLeftCorner<1, 2>();
+    inverse_matrix = inverse_matrix.inverse().eval();
+    return inverse_matrix;
+}
+BarycentricCoordinateSystem::Vector3d BarycentricCoordinateSystem::TransformToBarycentric(
+    const Matrix2d &transform_matrix, const Matrix3d &coordinates, const Vector2d &point) {
+
+    Vector3d ans;
+    ans.topLeftCorner<2, 1>() = point;
+    ans.topLeftCorner<2, 1>() -= coordinates.row(2).topLeftCorner<1, 2>();
+    ans.topLeftCorner<2, 1>() = transform_matrix * ans.topLeftCorner<2, 1>();
+    ans.z() = 1 - ans.x() - ans.y();
     return ans;
 }
 BarycentricCoordinateSystem::Matrix3d BarycentricCoordinateSystem::GetTriangleCoordinates(
@@ -95,5 +109,9 @@ Triangle::Matrix34d Triangle::GetVerticesHomogeniousCoordinates() const {
         ans.row(i) = verticies_[i].coordinates.GetHomogeneousCoordinates();
     }
     return ans;
+}
+const BarycentricCoordinateSystem::Matrix34d &
+BarycentricCoordinateSystem::GetOriginalCoordinatesMatrix() const {
+    return original_coordinates_matrix_;
 }
 }  // namespace renderer

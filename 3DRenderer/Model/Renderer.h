@@ -19,6 +19,7 @@ public:
     using Vector3d = Eigen::Vector3d;
     using Vector4d = Eigen::Vector4d;
     using Matrix3d = Eigen::Matrix3d;
+    using Matrix34d = Eigen::Matrix<double, 3, 4>;
     friend class model::Model;
     Renderer() = default;
 
@@ -42,8 +43,8 @@ public:
                                  std::list<Eigen::Matrix3d> *triangles);
 
 private:
-    static Matrix4d MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
-                                                        const Vector3d &offset);
-    static void ApplyMatrix(const Eigen::Matrix4d &, Triangle *);
+    static Matrix34d MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
+                                                         const Vector3d &offset);
+    static void ApplyMatrix(const Matrix34d &, Triangle *);
 };
 }  // namespace renderer

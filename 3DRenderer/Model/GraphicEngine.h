@@ -28,11 +28,12 @@ public:
     void TestUpdateProjection();
 
 private:
+    using PortReturnType = observer::CObservable<const Screen>::CReturn;
     const renderer::Screen& GetCurrentScreen();
     renderer::Renderer renderer_;
-    renderer::World world_;
+    World world_;
     observer::CObservable<const Screen> update_port_;
-    renderer::Screen current_screen_;
+    Screen current_screen_;
     int width_;
     int height_;
     std::vector<renderer::RGB> test_colors_ = {{0.5, 0.5, 0.5}, {0, 0, 0}};
