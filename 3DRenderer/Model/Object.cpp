@@ -1,8 +1,6 @@
 #include "Object.h"
-void renderer::BasicObject::AddTriangle(const BasicObject::Matrix3d& coordinates) {
-    mesh_.AddTriangle(coordinates);
+void renderer::BasicObject::AddTriangle(const BasicObject::Matrix3d& coordinates, size_t index) {
+    meshes_[index].AddTriangle(coordinates);
 }
-renderer::BasicObject::BasicObject(
-    std::function<RGB(const Triangle&, const Eigen::Vector3d&)> function)
-    : mesh_(function) {
+renderer::BasicObject::BasicObject() {
 }

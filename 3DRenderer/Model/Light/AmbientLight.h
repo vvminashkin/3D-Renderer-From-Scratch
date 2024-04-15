@@ -9,7 +9,7 @@ public:
     }
 
 private:
-    static constexpr double kDefaultIntenstity = 0.3;
+    static constexpr double kDefaultIntenstity = 0.2;
     static const RGB kDefaultColor;
     double intencity_ = kDefaultIntenstity;
     RGB color_ = kDefaultColor;

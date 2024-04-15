@@ -1,8 +1,10 @@
 #include "Mesh.h"
 
 namespace renderer {
-Mesh::Mesh(std::function<RGB(const Triangle&, const Vector3d&)> color_function)
-    : color_function_(color_function) {
+Mesh::Mesh(ColorFuntion ambient, ColorFuntion diffuse, ColorFuntion specular)
+    : ambient_color_function_(ambient),
+      diffuse_color_function_(diffuse),
+      specular_color_function_(specular) {
 }
 Iterable<Mesh::TrianglesConstIterator> Mesh::GetTriangles() const {
     return Iterable(triangles_.begin(), triangles_.end());
@@ -17,7 +19,8 @@ Triangle Mesh::MakeTriangleVertices(const ITriangle& triangle) const {
     for (size_t i = 0; i < 3; ++i) {
         ans.GetVerticies()[i] = vertices_[triangle.points_(i)];  // TODO get triangle
     }
-    ans.SetColorFunction(&color_function_);
+    ans.SetColorFunction(&ambient_color_function_, &diffuse_color_function_,
+                         &specular_color_function_);
 
     return ans;
 }

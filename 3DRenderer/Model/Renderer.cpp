@@ -115,16 +115,18 @@ std::unique_ptr<Screen> Renderer::Draw(const World &world, size_t width, size_t 
     LightSourcesDescription light_desc;
     ShiftLightToAlignCamera(world, &light_desc);
     for (const auto &object : world.GetObjectsIterable()) {
-        for (const auto &triangle : object->GetMesh().GetTriangles()) {
-            DrawTriangle(triangle, object, world, light_desc, screen.get());
+        for (const auto &mesh : object->GetMesh()) {
+            for (const auto &triangle : mesh.GetTriangles()) {
+                DrawTriangle(triangle, mesh, object, world, light_desc, screen.get());
+            }
         }
     }
     return screen;
 }
-void Renderer::DrawTriangle(const Mesh::ITriangle &current, const World::ObjectHolder &owner_object,
-                            const World &world, const LightSourcesDescription &light_desc,
-                            Screen *screen) {
-    Triangle vertices = owner_object->GetMesh().MakeTriangleVertices(current);
+void Renderer::DrawTriangle(const Mesh::ITriangle &current, const Mesh &mesh,
+                            const World::ObjectHolder &owner_object, const World &world,
+                            const LightSourcesDescription &light_desc, Screen *screen) {
+    Triangle vertices = mesh.MakeTriangleVertices(current);
     ShiftTriangleCoordinates(owner_object, &vertices);
 
     ShiftTriangleToAlignCamera(world, &vertices);
@@ -204,6 +206,7 @@ void Renderer::RasterizeTriangle(const BarycentricCoordinateSystem &system,
                 screen->SetPixel(
                     y, x,
                     CalculateBlinnPhong(
+                        system.GetOriginalTriangle().GetAmbientColor(b_coordinate),
                         system.GetOriginalTriangle().GetDiffuseColor(new_b_coordinate),
                         system.GetOriginalTriangle().GetSpecularColor(new_b_coordinate), desc,
                         world, new_b_coordinate, system.GetOriginalTriangle()));
@@ -312,23 +315,24 @@ void Renderer::ClipAllTriangles(const Eigen::Vector4d &plane,
         --it;
     }
 }
-RGB Renderer::CalculateBlinnPhong(const RGB &diffuse_color, const RGB &specular_color,
-                                  const LightSourcesDescription &desc, const World &world,
-                                  const Vector3d &b_coordinates, const Triangle &triangle) {
+RGB Renderer::CalculateBlinnPhong(const RGB &ambient_color, const RGB &diffuse_color,
+                                  const RGB &specular_color, const LightSourcesDescription &desc,
+                                  const World &world, const Vector3d &b_coordinates,
+                                  const Triangle &triangle) {
     RGB ans{0, 0, 0};
     Vector3d position = b_coordinates.transpose() * triangle.GetVerticiesCoordinates();
     Vector3d normal = triangle.GetNormal(b_coordinates);
+    for (const auto &light : world.GetAmbientLightSources()) {
+        ans += ambient_color * light.GetIntencity();
+    }
     RGB diffusion = CalculateBlinnPhongDiffusion(diffuse_color, desc, world, position, normal);
     RGB specular = CalculateBlinnPhongSpecular(specular_color, desc, world, position, normal);
-    return diffusion + specular;
+    return ans + diffusion + specular;
 }
 RGB Renderer::CalculateBlinnPhongDiffusion(const RGB &diffuse_color,
                                            const LightSourcesDescription &desc, const World &world,
                                            const Vector3d &coordinates, const Vector3d &normal) {
     RGB ans = {0, 0, 0};
-    for (const auto &light : world.GetAmbientLightSources()) {
-        ans += diffuse_color * light.GetIntencity();
-    }
     for (int i = 0; i < world.GetPointLightSources().size(); ++i) {
         Vector3d direction = (desc.point_light_coordinates_[i] - coordinates).eval().normalized();
         if ((-1 + 2 * std::signbit(normal.dot(-coordinates))) *

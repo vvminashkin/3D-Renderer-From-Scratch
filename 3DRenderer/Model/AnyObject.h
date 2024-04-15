@@ -35,8 +35,8 @@ public:
     class InnerBase {
     public:
         virtual ~InnerBase() = default;
-
-        virtual const Mesh &GetMesh() const = 0;
+        using MeshConstIterator = std::vector<Mesh>::const_iterator;
+        virtual Iterable<MeshConstIterator> GetMesh() const = 0;
         friend class AnyObject;
 
     private:
@@ -53,7 +53,7 @@ private:
         }
         Inner(const T &value) : value_(value) {
         }
-        const Mesh &GetMesh() const override {
+        Iterable<MeshConstIterator> GetMesh() const override {
             return value_.GetMesh();
         }
 

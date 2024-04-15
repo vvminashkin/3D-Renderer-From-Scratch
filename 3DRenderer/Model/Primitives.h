@@ -10,25 +10,28 @@ public:
     using Vector3d = Eigen::Vector3d;
     using Matrix34d = Eigen::Matrix<double, 3, 4>;
     using Matrix3d = Eigen::Matrix3d;
+    using ColorFunction = const std::function<RGB(const Triangle &, const Vector3d &)>;
     Triangle() = default;
-    Triangle(Eigen::Matrix3d, const std::function<RGB(const Triangle &, const Vector3d &)> *);
+    Triangle(Eigen::Matrix3d);
     Vector3d CalculateCoordinatesFromBarycentric(const Vector3d &) const;
     Eigen::Vector3<Vertex> &GetVerticies();
     const Eigen::Vector3<Vertex> &GetVerticies() const;
     Matrix3d GetVerticiesCoordinates() const;
     Matrix34d GetVerticesHomogeniousCoordinates() const;
-    RGB GetColor(const Vector3d &b_coordinate) const;
+    RGB GetAmbientColor(const Vector3d &b_coordinate) const;
     RGB GetDiffuseColor(const Vector3d &b_coordinate) const;
     RGB GetSpecularColor(const Vector3d &b_coordinate) const;
 
     Vector3d GetNormal(const Vector3d &b_coordinate) const;
-    void SetColorFunction(const std::function<RGB(const Triangle &, const Vector3d &)> *);
+    void SetColorFunction(const ColorFunction *ambient, const ColorFunction *diffuse,
+                          const ColorFunction *specular);
     void CalculateNorm();
 
 private:
     Eigen::Vector3<Vertex> verticies_;
     Eigen::Vector3d normal_;
-    const std::function<RGB(const Triangle &, const Vector3d &)> *color_function_p_ = nullptr;
+    const std::function<RGB(const Triangle &, const Vector3d &)> *ambient_color_function_p_ =
+        nullptr;
     const std::function<RGB(const Triangle &, const Vector3d &)> *diffuse_color_function_p_ =
         nullptr;
     const std::function<RGB(const Triangle &, const Vector3d &)> *specular_color_function_p_ =

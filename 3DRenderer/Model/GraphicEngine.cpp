@@ -4,6 +4,7 @@
 #include "Screen.h"
 #include "Utils.h"
 #include "Object.h"
+#include "ObjLoader/ObjLoader.h"
 #include <algorithm>
 #include <cmath>
 #include <memory>
@@ -15,28 +16,35 @@ GraphicEngine::GraphicEngine(int width, int height)
       current_screen_(width, height),
       update_port_([this]() -> PortReturnType { return this->current_screen_; }),
       world_(width, height) {
-    renderer::BasicObject object([](const renderer::Triangle&, Eigen::Vector3d) -> renderer::RGB {
-        return {1, 0, 0};
-    });
-    Eigen::Matrix3d test_triangle;
-    test_triangle << -0.61, -4.62, -9.54, 0.99, 6.23, -9.13, 1.73, 0.09, -4.32;
-    object.AddTriangle(test_triangle);
+
+    renderer::BasicObject object = ReadObject("untitled.obj");
     world_.AddObject(object);
-    renderer::BasicObject object1([](const renderer::Triangle&, Eigen::Vector3d) -> renderer::RGB {
-        return {0, 1, 0};
-    });
-    Eigen::Matrix3d test_triangle1;
-    test_triangle1 << 2.77, 1.39, -9.45, -0.13, 0.27, -3.15, -2, -2, -12;
-    renderer::BasicObject objectlight(
-        [](const renderer::Triangle&, Eigen::Vector3d) -> renderer::RGB {
-            return {10, 10, 10};
-        });
-    object1.AddTriangle(test_triangle1);
     world_.AddAmbientLight();
-    world_.AddPointLight({0.4, -0.3, -4.9});
+    world_.AddPointLight({0.4, 1.3, 2.9});
+    renderer::BasicObject objectlight;
+    objectlight.AddMesh({0, 10, 10}, {1, 1, 1}, {1, 1, 1});
     objectlight.AddTriangle(world_.GetPointLightSources()[0].GetSmallTriangle());
-    world_.AddObject(object1);
     world_.AddObject(objectlight);
+    /*
+renderer::BasicObject object;
+object.AddMesh({1, 0, 0}, {0, 1, 0}, {0, 0, 1});
+Eigen::Matrix3d test_triangle;
+test_triangle << -0.61, -4.62, -9.54, 0.99, 6.23, -9.13, 1.73, 0.09, -4.32;
+object.AddTriangle(test_triangle);
+world_.AddObject(object);
+renderer::BasicObject object1;
+object1.AddMesh({0, 1, 0}, {1, 0, 0}, {0, 0, 1});
+Eigen::Matrix3d test_triangle1;
+test_triangle1 << 2.77, 1.39, -9.45, -0.13, 0.27, -3.15, -2, -2, -12;
+renderer::BasicObject objectlight;
+objectlight.AddMesh({10, 10, 10}, {1, 1, 1}, {1, 1, 1});
+object1.AddTriangle(test_triangle1);
+world_.AddAmbientLight();
+world_.AddPointLight({0.4, -0.3, -4.9});
+objectlight.AddTriangle(world_.GetPointLightSources()[0].GetSmallTriangle());
+world_.AddObject(object1);
+world_.AddObject(objectlight);
+*/
 }
 
 const renderer::Screen& GraphicEngine::GetCurrentScreen() {

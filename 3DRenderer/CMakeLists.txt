@@ -23,6 +23,7 @@ add_executable(${PROJECT_NAME} main.cpp
         Application.cpp
         Model/Light/AmbientLight.cpp
         Model/Light/PointLight.cpp
+        Model/ObjLoader/ObjLoader.cpp
         #tags
 )
 target_link_libraries(${PROJECT_NAME} sfml-graphics )

@@ -30,8 +30,9 @@ public:
     void ShiftLightToAlignCamera(const World &, LightSourcesDescription *desc);
     void ShiftTriangleCoordinates(const World::ObjectHolder &owner, Triangle *);
     void ShiftTriangleToAlignCamera(const World &, Triangle *);
-    void DrawTriangle(const Mesh::ITriangle &current, const World::ObjectHolder &owner_object,
-                      const World &world, const LightSourcesDescription &, Screen *screen);
+    void DrawTriangle(const Mesh::ITriangle &current, const Mesh &,
+                      const World::ObjectHolder &owner_object, const World &world,
+                      const LightSourcesDescription &, Screen *screen);
 
     void RasterizeTriangle(const BarycentricCoordinateSystem &, const Eigen::Matrix3d &,
                            const World &, const LightSourcesDescription &, Screen *);
@@ -46,9 +47,10 @@ public:
     static void ClipAllTriangles(const Eigen::Vector4d &plane,
                                  std::list<Eigen::Matrix3d> *triangles);
 
-    RGB CalculateBlinnPhong(const RGB &diffuse_color, const RGB &specular_color,
-                            const LightSourcesDescription &desc, const World &world,
-                            const Vector3d &b_coordinates, const Triangle &triangle);
+    RGB CalculateBlinnPhong(const RGB &ambient_color, const RGB &diffuse_color,
+                            const RGB &specular_color, const LightSourcesDescription &desc,
+                            const World &world, const Vector3d &b_coordinates,
+                            const Triangle &triangle);
     RGB CalculateBlinnPhongDiffusion(const RGB &initial_color, const LightSourcesDescription &desc,
                                      const World &world, const Vector3d &coordinates,
                                      const Vector3d &normal);

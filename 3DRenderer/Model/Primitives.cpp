@@ -4,10 +4,7 @@
 #include <cassert>
 
 namespace renderer {
-Triangle::Triangle(Matrix3d coordinates,
-                   const std::function<RGB(const Triangle &, const Vector3d &)> *color_function_p)
-    : color_function_p_(color_function_p) {
-    assert("color function is nullptr" && color_function_p);
+Triangle::Triangle(Matrix3d coordinates) {
     verticies_.x().coordinates = coordinates.row(0);
     verticies_.y().coordinates = coordinates.row(1);
     verticies_.z().coordinates = coordinates.row(2);
@@ -20,12 +17,12 @@ Triangle::Vector3d Triangle::CalculateCoordinatesFromBarycentric(
           verticies_.z().coordinates.GetCoordinates() * coordinates.z();
     return ans;
 }
-RGB Triangle::GetColor(const Vector3d &b_coordinate) const {
-    return (*color_function_p_)(*this, b_coordinate);
+RGB Triangle::GetAmbientColor(const Vector3d &b_coordinate) const {
+    return (*ambient_color_function_p_)(*this, b_coordinate);
 }
 RGB Triangle::GetDiffuseColor(const Vector3d &b_coordinate) const {
     if (!diffuse_color_function_p_) {
-        return GetColor(b_coordinate);
+        return GetAmbientColor(b_coordinate);
     }
     return (*diffuse_color_function_p_)(*this, b_coordinate);
 }
@@ -35,9 +32,11 @@ RGB Triangle::GetSpecularColor(const Vector3d &b_coordinate) const {
     }
     return (*specular_color_function_p_)(*this, b_coordinate);
 }
-void Triangle::SetColorFunction(
-    const std::function<RGB(const Triangle &, const Vector3d &)> *color_function_p) {
-    color_function_p_ = color_function_p;
+void Triangle::SetColorFunction(const ColorFunction *ambient, const ColorFunction *diffuse,
+                                const ColorFunction *specular) {
+    ambient_color_function_p_ = ambient;
+    diffuse_color_function_p_ = diffuse;
+    specular_color_function_p_ = specular;
 }
 void Triangle::CalculateNorm() {
     normal_ =
@@ -118,7 +117,7 @@ double BarycentricCoordinateSystem::InterpolateZCoordinate(
     return transformed_coordinates_matrix_.col(3).dot(coordinates);
 }
 RGB BarycentricCoordinateSystem::GetColor(const Vector3d &b_coordinate) const {
-    return original_.GetColor(b_coordinate);
+    return original_.GetAmbientColor(b_coordinate);
 }
 BarycentricCoordinateSystem::Vector3d BarycentricCoordinateSystem::ConvertToBarycentricCoordinates(
     Eigen::Vector2d vec) const {
