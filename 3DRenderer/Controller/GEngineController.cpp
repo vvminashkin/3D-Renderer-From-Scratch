@@ -61,6 +61,10 @@ bool GEngineController::HandleKeyPressedEvent(const sf::Event::KeyEvent& event) 
         case sf::Keyboard::A:
             pressed_keys_.push_back(sf::Keyboard::A);
             break;
+        case sf::Keyboard::L:
+            model_->SwitchLightingModel();
+            model_->TestUpdateProjection();
+            break;
         default:
             break;
     }

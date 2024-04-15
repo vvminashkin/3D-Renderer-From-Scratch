@@ -23,6 +23,18 @@ Triangle::Vector3d Triangle::CalculateCoordinatesFromBarycentric(
 RGB Triangle::GetColor(const Vector3d &b_coordinate) const {
     return (*color_function_p_)(*this, b_coordinate);
 }
+RGB Triangle::GetDiffuseColor(const Vector3d &b_coordinate) const {
+    if (!diffuse_color_function_p_) {
+        return GetColor(b_coordinate);
+    }
+    return (*diffuse_color_function_p_)(*this, b_coordinate);
+}
+RGB Triangle::GetSpecularColor(const Vector3d &b_coordinate) const {
+    if (!specular_color_function_p_) {
+        return {1, 1, 1};
+    }
+    return (*specular_color_function_p_)(*this, b_coordinate);
+}
 void Triangle::SetColorFunction(
     const std::function<RGB(const Triangle &, const Vector3d &)> *color_function_p) {
     color_function_p_ = color_function_p;

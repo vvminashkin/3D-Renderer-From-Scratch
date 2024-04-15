@@ -26,6 +26,7 @@ public:
 
     void Subscribe(observer::CObserver<const Screen>* obs);
     void TestUpdateProjection();
+    void SwitchLightingModel();
 
 private:
     using PortReturnType = observer::CObservable<const Screen>::CReturn;

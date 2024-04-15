@@ -25,6 +25,7 @@ public:
     struct LightSourcesDescription {
         std::vector<Vector3d> point_light_coordinates_;
     };
+    void SwitchLightModel();
     std::unique_ptr<Screen> Draw(const World &world, size_t width, size_t height);
     void ShiftLightToAlignCamera(const World &, LightSourcesDescription *desc);
     void ShiftTriangleCoordinates(const World::ObjectHolder &owner, Triangle *);
@@ -45,14 +46,18 @@ public:
     static void ClipAllTriangles(const Eigen::Vector4d &plane,
                                  std::list<Eigen::Matrix3d> *triangles);
 
-    RGB CalculateBlinnPhong(const RGB &initial_color, const LightSourcesDescription &desc,
-                            const World &world, const Vector3d &b_coordinates,
-                            const Triangle &triangle);
+    RGB CalculateBlinnPhong(const RGB &diffuse_color, const RGB &specular_color,
+                            const LightSourcesDescription &desc, const World &world,
+                            const Vector3d &b_coordinates, const Triangle &triangle);
     RGB CalculateBlinnPhongDiffusion(const RGB &initial_color, const LightSourcesDescription &desc,
                                      const World &world, const Vector3d &coordinates,
                                      const Vector3d &normal);
+    RGB CalculateBlinnPhongSpecular(const RGB &initial_color, const LightSourcesDescription &desc,
+                                    const World &world, const Vector3d &coordinates,
+                                    const Vector3d &normal);
 
 private:
+    bool use_blinn_phong_ = true;
     static Matrix34d MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
                                                          const Vector3d &offset);
     static void ApplyMatrix(const Matrix34d &, Triangle *);

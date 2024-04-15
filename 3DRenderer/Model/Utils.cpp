@@ -1,5 +1,6 @@
 #include "Utils.h"
 #include <cassert>
+#include <iostream>
 
 namespace renderer {
 double renderer::RGB::GetR() const {
@@ -20,6 +21,11 @@ double renderer::RGB::GetB() const {
 void renderer::RGB::SetB(double val) {
     val_(2) = val;
 }
+void RGB::normalize() {
+    val_ = val_.cwiseMax(0.0);
+    val_ = val_.cwiseMin(1.0);
+}
+
 uint8_t RGB::DoubleToInt(double val) {
     return std::min(std::max(static_cast<uint32_t>(val * 255.0), uint32_t{0}), uint32_t{255});
 }

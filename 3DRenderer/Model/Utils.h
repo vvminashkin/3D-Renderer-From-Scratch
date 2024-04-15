@@ -20,6 +20,7 @@ public:
     void SetG(double);
     double GetB() const;
     void SetB(double);
+    void normalize();  // NOLINT
 
     RGB operator+(const RGB &other) const;
     RGB operator*(const RGB &other) const;

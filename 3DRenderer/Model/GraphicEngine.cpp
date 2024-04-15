@@ -112,7 +112,6 @@ void GraphicEngine::MoveCameraLeft(double shift) {
     world_.SetCameraPosition(world_.GetCameraPosition() - axis_of_rotation * shift);
 }
 void GraphicEngine::MoveCameraForward(double shift) {
-    std::cout << 1 << std::endl;
     Quaterniond camera_rotation = world_.GetCameraRotation();
     Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
     Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
@@ -123,5 +122,8 @@ void GraphicEngine::MoveCameraBackward(double shift) {
     Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
     Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
     world_.SetCameraPosition(world_.GetCameraPosition() - direction * shift);
+}
+void GraphicEngine::SwitchLightingModel() {
+    renderer_.SwitchLightModel();
 }
 }  // namespace kernel
