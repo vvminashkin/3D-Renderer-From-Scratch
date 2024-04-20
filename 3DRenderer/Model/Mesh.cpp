@@ -46,7 +46,7 @@ void Mesh::AddTriangle(const Eigen::Matrix3d &coordinates, const Eigen::Matrix3d
     int current_ind = vertices_.size();
     for (int i = 0; i < 3; ++i) {
         vertices_.emplace_back(
-            Vertex{.coordinates = static_cast<Eigen::Vector3d>(coordinates.row(i).eval()),
+            Vertex{.coordinates = static_cast<Vector3d>(coordinates.row(i).eval()),
                    .normal = static_cast<Vector3d>(normals.row(i).normalized().eval())});
     }
 

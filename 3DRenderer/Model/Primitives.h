@@ -22,6 +22,8 @@ public:
     RGB GetDiffuseColor(const Vector3d &b_coordinate) const;
     RGB GetSpecularColor(const Vector3d &b_coordinate) const;
 
+    const Vector3d &GetRealNormal() const;
+
     Vector3d GetNormal(const Vector3d &b_coordinate) const;
     void SetColorFunction(const ColorFunction *ambient, const ColorFunction *diffuse,
                           const ColorFunction *specular);

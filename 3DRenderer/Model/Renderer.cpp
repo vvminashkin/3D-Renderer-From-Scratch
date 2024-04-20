@@ -103,11 +103,7 @@ void Renderer::ShiftTriangleToAlignCamera(const World &world, Triangle *vertices
     Matrix34d transformation_matrix = Renderer::MakeHomogeneousTransformationMatrix(
         world.GetCameraRotation().inverse(),
         world.GetCameraRotation().inverse() * -world.GetCameraPosition());
-    // std::cout<<world.GetCameraRotation()<<std::endl;
-    // std::cout<<vertices->GetVerticiesCoordinates()<<std::endl;
     Renderer::ApplyMatrix(transformation_matrix, vertices);
-    // std::cout<<vertices->GetVerticiesCoordinates().row(0)<<std::endl;
-    //  std::cout<<vertices->GetVerticiesCoordinates()<<std::endl;
 }
 
 std::unique_ptr<Screen> Renderer::Draw(const World &world, size_t width, size_t height) {
@@ -315,29 +311,37 @@ void Renderer::ClipAllTriangles(const Eigen::Vector4d &plane,
         --it;
     }
 }
+Vector3d delete_this;
 RGB Renderer::CalculateBlinnPhong(const RGB &ambient_color, const RGB &diffuse_color,
                                   const RGB &specular_color, const LightSourcesDescription &desc,
                                   const World &world, const Vector3d &b_coordinates,
                                   const Triangle &triangle) {
     RGB ans{0, 0, 0};
     Vector3d position = b_coordinates.transpose() * triangle.GetVerticiesCoordinates();
+    delete_this = b_coordinates;
+
     Vector3d normal = triangle.GetNormal(b_coordinates);
+    const Vector3d &real_normal = triangle.GetRealNormal();
     for (const auto &light : world.GetAmbientLightSources()) {
         ans += ambient_color * light.GetIntencity();
     }
-    RGB diffusion = CalculateBlinnPhongDiffusion(diffuse_color, desc, world, position, normal);
-    RGB specular = CalculateBlinnPhongSpecular(specular_color, desc, world, position, normal);
+    RGB diffusion =
+        CalculateBlinnPhongDiffusion(diffuse_color, desc, world, position, normal, real_normal);
+    RGB specular =
+        CalculateBlinnPhongSpecular(specular_color, desc, world, position, normal, real_normal);
     return ans + diffusion + specular;
 }
 RGB Renderer::CalculateBlinnPhongDiffusion(const RGB &diffuse_color,
                                            const LightSourcesDescription &desc, const World &world,
-                                           const Vector3d &coordinates, const Vector3d &normal) {
+                                           const Vector3d &coordinates, const Vector3d &normal,
+                                           const Vector3d &real_normal) {
     RGB ans = {0, 0, 0};
     for (int i = 0; i < world.GetPointLightSources().size(); ++i) {
         Vector3d direction = (desc.point_light_coordinates_[i] - coordinates).eval().normalized();
-        if ((-1 + 2 * std::signbit(normal.dot(-coordinates))) *
-                (-1 + 2 * std::signbit(normal.dot(direction))) <
-            0) {
+        if (delete_this.minCoeff() >= 0.332) {
+            // std::cout<<direction.dot(normal)<<std::endl;
+        }
+        if ((-(-1 + 2 * std::signbit(normal.dot(direction)))) < 0) {
             continue;
         }
         const auto &light = world.GetPointLightSources()[i];
@@ -352,14 +356,13 @@ RGB Renderer::CalculateBlinnPhongDiffusion(const RGB &diffuse_color,
 }
 RGB Renderer::CalculateBlinnPhongSpecular(const RGB &initial_color,
                                           const LightSourcesDescription &desc, const World &world,
-                                          const Vector3d &coordinates, const Vector3d &normal) {
+                                          const Vector3d &coordinates, const Vector3d &normal,
+                                          const Vector3d &real_normal) {
     RGB ans = {0, 0, 0};
     constexpr int kM = 25;
     for (int i = 0; i < world.GetPointLightSources().size(); ++i) {
         Vector3d direction = (desc.point_light_coordinates_[i] - coordinates).eval().normalized();
-        if ((-1 + 2 * std::signbit(normal.dot(-coordinates))) *
-                (-1 + 2 * std::signbit(normal.dot(direction))) <
-            0) {
+        if (-(-1 + 2 * std::signbit(normal.dot(direction))) < 0) {
             continue;
         }
         Vector3d viewer = (-coordinates).normalized();

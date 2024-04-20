@@ -53,10 +53,10 @@ public:
                             const Triangle &triangle);
     RGB CalculateBlinnPhongDiffusion(const RGB &initial_color, const LightSourcesDescription &desc,
                                      const World &world, const Vector3d &coordinates,
-                                     const Vector3d &normal);
+                                     const Vector3d &normal, const Vector3d &real_normal);
     RGB CalculateBlinnPhongSpecular(const RGB &initial_color, const LightSourcesDescription &desc,
                                     const World &world, const Vector3d &coordinates,
-                                    const Vector3d &normal);
+                                    const Vector3d &normal, const Vector3d &real_normal);
 
 private:
     bool use_blinn_phong_ = true;

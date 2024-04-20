@@ -11,6 +11,7 @@ public:
     using Screen = renderer::Screen;
     using Quaterniond = Eigen::Quaterniond;
     using Vector3d = Eigen::Vector3d;
+    using RGB = renderer::RGB;
     GraphicEngine(int width, int height);
     void TiltCameraUp(double shift);
     void TiltCameraDown(double shift);

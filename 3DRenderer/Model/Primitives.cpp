@@ -44,6 +44,7 @@ void Triangle::CalculateNorm() {
             .cross(verticies_[0].coordinates.GetCoordinates() -
                    verticies_[2].coordinates.GetCoordinates())
             .normalized();
+    normal_ = -normal_;
 }
 Triangle::Vector3d Triangle::GetNormal(const Vector3d &b_coordinate) const {
     if (!normal_function_p_) {
@@ -144,5 +145,8 @@ const Triangle &BarycentricCoordinateSystem::GetOriginalTriangle() const {
 void Triangle::SetNormalFunction(
     const std::function<Vector3d(const Triangle &, const Vector3d &)> *func) {
     normal_function_p_ = func;
+}
+const Triangle::Vector3d &Triangle::GetRealNormal() const {
+    return normal_;
 }
 }  // namespace renderer

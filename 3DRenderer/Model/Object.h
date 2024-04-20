@@ -13,45 +13,29 @@ public:
     using Matrix3d = Eigen::Matrix3d;
     void AddTriangle(const Matrix3d&, size_t index = 0);
     void AddTriangle(const Matrix3d&, const Matrix3d&, size_t index = 0);
-    Iterable<MeshConstIterator> GetMesh() const {
-        return Iterable<MeshConstIterator>(meshes_.begin(), meshes_.end());
-    }
-    void AddMesh(RGB ambient, RGB diffuse, RGB specular) {
-        meshes_.emplace_back(
-            [ambient](const Triangle&, const Vector3d& b_coordinates) { return ambient; },
-
-            [diffuse](const Triangle&, const Vector3d& b_coordinates) { return diffuse; },
-
-            [specular](const Triangle&, const Vector3d& b_coordinates) { return specular; });
-    }
+    Iterable<MeshConstIterator> GetMesh() const;
+    void AddMesh(RGB ambient, RGB diffuse, RGB specular);
     Mesh& GetMesh(size_t index = 0);
 
 private:
     std::vector<Mesh> meshes_;
 };
 class Sphere {
-
+public:
     using ColorFunction = std::function<RGB(const Triangle&, const Eigen::Vector3d&)>;
     using MeshConstIterator = std::vector<Mesh>::const_iterator;
     using Vector3d = Eigen::Vector3d;
-    Sphere();
+    Sphere(RGB ambient, RGB diffuse, RGB specular, double radius = 1.0,
+           size_t max_triangle_count = 320);
     using Matrix3d = Eigen::Matrix3d;
-    void AddTriangle(const Matrix3d&, size_t index = 0);
-    void AddTriangle(const Matrix3d&, const Matrix3d&, size_t index = 0);
-    Iterable<MeshConstIterator> GetMesh() const {
-        return Iterable<MeshConstIterator>(meshes_.begin(), meshes_.end());
-    }
-    void AddMesh(RGB ambient, RGB diffuse, RGB specular) {
-        meshes_.emplace_back(
-            [ambient](const Triangle&, const Vector3d& b_coordinates) { return ambient; },
-
-            [diffuse](const Triangle&, const Vector3d& b_coordinates) { return diffuse; },
-
-            [specular](const Triangle&, const Vector3d& b_coordinates) { return specular; });
-    }
+    Iterable<MeshConstIterator> GetMesh() const;
     Mesh& GetMesh(size_t index = 0);
 
 private:
+    static std::list<Matrix3d> MakeTetrahydron();
+    static void SubDivideAndExtrude(Matrix3d, std::list<Matrix3d>*);
+    static Matrix3d MakeMatrix(Vector3d, Vector3d, Vector3d);
+    void AddMesh(RGB ambient, RGB diffuse, RGB specular);
     std::vector<Mesh> meshes_;
 };
 }  // namespace renderer

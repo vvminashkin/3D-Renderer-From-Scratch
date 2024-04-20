@@ -17,11 +17,12 @@ GraphicEngine::GraphicEngine(int width, int height)
       update_port_([this]() -> PortReturnType { return this->current_screen_; }),
       world_(width, height) {
 
-    renderer::BasicObject object = ReadObject("suzanne.obj");
+    // renderer::BasicObject object = ReadObject("suzanne.obj");
+    renderer::Sphere object(RGB{1, 1, 1}, RGB{1, 1, 1}, RGB{1, 1, 1}, 1);
     world_.AddObject(object);
     world_.AddAmbientLight();
     world_.AddPointLight({0.4, 4.3, 2.9});
-    // world_.AddPointLight({-0.3, 1, 0});
+
     renderer::BasicObject objectlight;
     objectlight.AddMesh({0, 10, 10}, {1, 1, 1}, {1, 1, 1});
     objectlight.AddTriangle(world_.GetPointLightSources()[0].GetSmallTriangle());
