@@ -32,7 +32,7 @@ public:
     Mesh& GetMesh(size_t index = 0);
 
 private:
-    static std::list<Matrix3d> MakeTetrahydron();
+    static std::list<Matrix3d> MakeIcosahedron();
     static void SubDivideAndExtrude(Matrix3d, std::list<Matrix3d>*);
     static Matrix3d MakeMatrix(Vector3d, Vector3d, Vector3d);
     void AddMesh(RGB ambient, RGB diffuse, RGB specular);

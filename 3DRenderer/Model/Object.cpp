@@ -29,7 +29,7 @@ Iterable<BasicObject::MeshConstIterator> renderer::Sphere::GetMesh() const {
 }
 renderer::Sphere::Sphere(RGB ambient, RGB diffuse, RGB specular, double radius,
                          size_t max_triangle_count) {
-    std::list<Matrix3d> triangles = MakeTetrahydron();
+    std::list<Matrix3d> triangles = MakeIcosahedron();
     // subdivide
     AddMesh(ambient, diffuse, specular);
     while (triangles.size() * 4 <= max_triangle_count) {
@@ -68,7 +68,7 @@ void renderer::Sphere::AddMesh(RGB ambient, RGB diffuse, RGB specular) {
 
         [specular](const Triangle &, const Vector3d &b_coordinates) { return specular; });
 }
-std::list<Sphere::Matrix3d> Sphere::MakeTetrahydron() {
+std::list<Sphere::Matrix3d> Sphere::MakeIcosahedron() {
     std::list<Matrix3d> triangles;
     Matrix3d triangle;
     double phi = (1.0f + sqrt(5.0f)) * 0.5f;  // golden ratio

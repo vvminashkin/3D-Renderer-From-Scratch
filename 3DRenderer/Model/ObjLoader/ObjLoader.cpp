@@ -1,6 +1,7 @@
 #include "../../../OBJ-Loader/Source/OBJ_Loader.h"
 #include "ObjLoader.h"
 #include <iostream>
+#include <filesystem>
 
 namespace kernel {
 using RGB = renderer::RGB;
@@ -23,6 +24,14 @@ Vector3d MakeVector3d(const objl::Vector3 &vec) {
 }
 
 }  // namespace
+void ReadAllFromDirectory(std::string path, renderer::World *world) {
+    for (const auto &entry : std::filesystem::directory_iterator(path)) {
+        std::string file_path = entry.path().string();
+        if (file_path.substr(file_path.size() - 4, file_path.size()) == ".obj") {
+            world->AddObject(ReadObject(file_path));
+        }
+    }
+}
 BasicObject ReadObject(const std::string &path) {
     BasicObject ans;
     objl::Loader loader;

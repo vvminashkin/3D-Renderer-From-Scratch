@@ -17,9 +17,7 @@ GraphicEngine::GraphicEngine(int width, int height)
       update_port_([this]() -> PortReturnType { return this->current_screen_; }),
       world_(width, height) {
 
-    // renderer::BasicObject object = ReadObject("suzanne.obj");
-    renderer::Sphere object(RGB{1, 1, 1}, RGB{1, 1, 1}, RGB{1, 1, 1}, 1);
-    world_.AddObject(object);
+    ReadAllFromDirectory("Models", &world_);
     world_.AddAmbientLight();
     world_.AddPointLight({0.4, 4.3, 2.9});
 
