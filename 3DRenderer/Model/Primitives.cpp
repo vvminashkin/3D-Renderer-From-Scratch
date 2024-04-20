@@ -141,4 +141,8 @@ BarycentricCoordinateSystem::GetOriginalCoordinatesMatrix() const {
 const Triangle &BarycentricCoordinateSystem::GetOriginalTriangle() const {
     return original_;
 }
+void Triangle::SetNormalFunction(
+    const std::function<Vector3d(const Triangle &, const Vector3d &)> *func) {
+    normal_function_p_ = func;
+}
 }  // namespace renderer

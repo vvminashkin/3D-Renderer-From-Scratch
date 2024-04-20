@@ -17,12 +17,15 @@ public:
     };
     using VerticesConstIterator = std::vector<Vertex>::const_iterator;
     using TrianglesConstIterator = std::vector<ITriangle>::const_iterator;
+    void SetNormalFunction(
+        std::function<Vector3d(const Triangle &, const Vector3d &)> normal_function);
     Iterable<VerticesConstIterator> GetVertices() const;
 
     Iterable<TrianglesConstIterator> GetTriangles() const;
 
     Triangle MakeTriangleVertices(const ITriangle &) const;
     void AddTriangle(const Eigen::Matrix3d &);
+    void AddTriangle(const Eigen::Matrix3d &, const Eigen::Matrix3d &);
 
 private:
     std::vector<Vertex> vertices_;
@@ -30,5 +33,6 @@ private:
     std::function<RGB(const Triangle &, const Vector3d &)> ambient_color_function_;
     std::function<RGB(const Triangle &, const Vector3d &)> diffuse_color_function_;
     std::function<RGB(const Triangle &, const Vector3d &)> specular_color_function_;
+    std::function<Vector3d(const Triangle &, const Vector3d &)> normal_function_;
 };
 }  // namespace renderer

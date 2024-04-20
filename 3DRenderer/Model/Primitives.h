@@ -25,6 +25,7 @@ public:
     Vector3d GetNormal(const Vector3d &b_coordinate) const;
     void SetColorFunction(const ColorFunction *ambient, const ColorFunction *diffuse,
                           const ColorFunction *specular);
+    void SetNormalFunction(const std::function<Vector3d(const Triangle &, const Vector3d &)> *func);
     void CalculateNorm();
 
 private:

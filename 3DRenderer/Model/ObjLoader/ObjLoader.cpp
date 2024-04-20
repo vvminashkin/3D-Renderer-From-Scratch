@@ -32,19 +32,31 @@ BasicObject ReadObject(const std::string &path) {
         const auto &mesh = loader.LoadedMeshes[i];
         RGB ambient, diffuse, specular;
         ambient = MakeRgb(mesh.MeshMaterial.Ka);
-        std::cout << mesh.MeshMaterial.Kd.X << ' ' << mesh.MeshMaterial.Kd.Y << ' '
-                  << mesh.MeshMaterial.Kd.Z << std::endl;
+        std::cout << mesh.MeshMaterial.Ka.X << ' ' << mesh.MeshMaterial.Ka.Y << ' '
+                  << mesh.MeshMaterial.Ka.Z << std::endl;
         diffuse = MakeRgb(mesh.MeshMaterial.Kd);
         specular = MakeRgb(mesh.MeshMaterial.Ks);
         ans.AddMesh(ambient, diffuse, specular);
-        for (int j = 0; j < mesh.Indices.size(); j += 3) {
+        for (int j = 0; j < mesh.Indices.size() - mesh.Indices.size() % 3; j += 3) {
             Matrix3d coords;
             coords.row(0) = MakeVector3d(mesh.Vertices[mesh.Indices[j]].Position);
             coords.row(1) = MakeVector3d(mesh.Vertices[mesh.Indices[j + 1]].Position);
             coords.row(2) = MakeVector3d(mesh.Vertices[mesh.Indices[j + 2]].Position);
-            // std::cout<<coords<<std::endl;
-            ans.AddTriangle(coords, i);
+
+            Matrix3d normals;
+            normals.row(0) = MakeVector3d(mesh.Vertices[mesh.Indices[j]].Normal);
+            normals.row(1) = MakeVector3d(mesh.Vertices[mesh.Indices[j + 1]].Normal);
+            normals.row(2) = MakeVector3d(mesh.Vertices[mesh.Indices[j + 2]].Normal);
+            ans.AddTriangle(coords, normals, i);
         }
+        ans.GetMesh(i).SetNormalFunction(
+            [](const renderer::Triangle &tr, const Vector3d &b_coords) -> Vector3d {
+                Vector3d ans = Vector3d::Zero();
+                for (int k = 0; k < tr.GetVerticies().size(); ++k) {
+                    ans += tr.GetVerticies()[k].normal.GetCoordinates() * b_coords[k];
+                }
+                return ans.normalized();
+            });
     }
     return ans;
 }
