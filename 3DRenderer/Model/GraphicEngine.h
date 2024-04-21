@@ -12,25 +12,32 @@ public:
     using Quaterniond = Eigen::Quaterniond;
     using Vector3d = Eigen::Vector3d;
     using RGB = renderer::RGB;
+    using AnyHolderPointer = renderer::AnyHolderPointer;
     GraphicEngine(int width, int height);
-    void TiltCameraUp(double shift);
-    void TiltCameraDown(double shift);
-    void TiltCameraRight(double shift);
-    void TiltCameraLeft(double shift);
+    AnyHolderPointer GetSelected();
+    void TiltUp(double shift, AnyHolderPointer selected);
+    void TiltDown(double shift, AnyHolderPointer selected);
+    void TiltRight(double shift, AnyHolderPointer selected);
+    void TiltLeft(double shift, AnyHolderPointer selected);
 
-    void MoveCameraUp(double shift);
-    void MoveCameraDown(double shift);
-    void MoveCameraRight(double shift);
-    void MoveCameraLeft(double shift);
-    void MoveCameraForward(double shift);
-    void MoveCameraBackward(double shift);
+    void MoveUp(double shift, AnyHolderPointer selected);
+    void MoveDown(double shift, AnyHolderPointer selected);
+    void MoveRight(double shift, AnyHolderPointer selected);
+    void MoveLeft(double shift, AnyHolderPointer selected);
+    void MoveForward(double shift, AnyHolderPointer selected);
+    void MoveBackward(double shift, AnyHolderPointer selected);
 
     void Subscribe(observer::CObserver<const Screen>* obs);
     void TestUpdateProjection();
     void SwitchLightingModel();
+    void SwitchObject();
+    void SwitchCamera();
+    void SwitchLight();
 
 private:
+    void ResetEditingStates();
     using PortReturnType = observer::CObservable<const Screen>::CReturn;
+
     const renderer::Screen& GetCurrentScreen();
     renderer::Renderer renderer_;
     World world_;
@@ -39,8 +46,12 @@ private:
     int width_;
     int height_;
     std::vector<renderer::RGB> test_colors_ = {{0.5, 0.5, 0.5}, {0, 0, 0}};
-    int test_current_index_ = 0;
-    double test_current_plane_d_ = 1;
+    bool is_changing_objects_ = false;
+    bool is_changing_camera_ = true;
+    bool is_changing_point_lights_ = false;
+    size_t selected_obj_ = 0;
+    size_t selected_point_light_ = 0;
+    AnyHolderPointer selected_;
 };
 
 };  // namespace kernel

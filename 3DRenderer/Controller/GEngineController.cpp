@@ -65,6 +65,15 @@ bool GEngineController::HandleKeyPressedEvent(const sf::Event::KeyEvent& event) 
             model_->SwitchLightingModel();
             model_->TestUpdateProjection();
             break;
+        case sf::Keyboard::O:
+            model_->SwitchObject();
+            break;
+        case sf::Keyboard::C:
+            model_->SwitchCamera();
+            break;
+        case sf::Keyboard::P:
+            model_->SwitchLight();
+            break;
         default:
             break;
     }
@@ -84,34 +93,34 @@ void GEngineController::HandleKeys() {
     for (const auto& key : pressed_keys_) {
         switch (key) {
             case sf::Keyboard::Up:
-                model_->TiltCameraUp(kDefaultRotation);
+                model_->TiltUp(kDefaultRotation, model_->GetSelected());
                 break;
             case sf::Keyboard::Down:
-                model_->TiltCameraDown(kDefaultRotation);
+                model_->TiltDown(kDefaultRotation, model_->GetSelected());
                 break;
             case sf::Keyboard::Right:
-                model_->TiltCameraRight(kDefaultRotation);
+                model_->TiltRight(kDefaultRotation, model_->GetSelected());
                 break;
             case sf::Keyboard::Left:
-                model_->TiltCameraLeft(kDefaultRotation);
+                model_->TiltLeft(kDefaultRotation, model_->GetSelected());
                 break;
             case sf::Keyboard::Space:
-                model_->MoveCameraUp(kDefaultMove);
+                model_->MoveUp(kDefaultMove, model_->GetSelected());
                 break;
             case sf::Keyboard::Z:
-                model_->MoveCameraDown(kDefaultMove);
+                model_->MoveDown(kDefaultMove, model_->GetSelected());
                 break;
             case sf::Keyboard::W:
-                model_->MoveCameraForward(kDefaultMove);
+                model_->MoveForward(kDefaultMove, model_->GetSelected());
                 break;
             case sf::Keyboard::S:
-                model_->MoveCameraBackward(kDefaultMove);
+                model_->MoveBackward(kDefaultMove, model_->GetSelected());
                 break;
             case sf::Keyboard::D:
-                model_->MoveCameraRight(kDefaultMove);
+                model_->MoveRight(kDefaultMove, model_->GetSelected());
                 break;
             case sf::Keyboard::A:
-                model_->MoveCameraLeft(kDefaultMove);
+                model_->MoveLeft(kDefaultMove, model_->GetSelected());
                 break;
             default:
                 break;

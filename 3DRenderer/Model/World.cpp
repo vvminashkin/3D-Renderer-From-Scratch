@@ -2,8 +2,6 @@
 #include <iostream>
 
 namespace renderer {
-const World::Vector3d World::CameraHolder::kDefaultDirection{0, 0, -1};
-const World::Vector3d World::CameraHolder::kDefaultNormal{0, 1, 0};
 World::World(int width, int height) {
     Camera curr(width, height);
     cameras_.push_back(curr);
@@ -41,6 +39,9 @@ const std::vector<World::TLightHolder<PointLightSource>> &World::GetPointLightSo
     return point_lights_;
 }
 
+std::vector<World::TLightHolder<PointLightSource>> &World::GetPointLightSources() {
+    return point_lights_;
+}
 void World::SetCameraRotation(const Quaterniond &rotation) {
     cameras_[current_camera_ind_].SetAngle(rotation);
 }
@@ -60,6 +61,12 @@ void World::CameraHolder::SetCoordinates(const Vector3d &coordinates) {
 void World::CameraHolder::SetAngle(const Quaterniond &angle) {
     rotation_ = angle;
 }
+World::Vector3d World::CameraHolder::GetDirection() {
+    return rotation_ * Vector3d{0, 0, -1};
+};
+World::Vector3d World::CameraHolder::GetNormal() {
+    return rotation_ * Vector3d{0, 1, 0};
+};
 
 World::ObjectHolder::ObjectHolder(AnyObject &&obj, const Vector3d &coord,
                                   const Eigen::AngleAxisd &rotation)
@@ -87,4 +94,19 @@ void World::ObjectHolder::SetAngle(const Eigen::AngleAxis<double> &angle) {
 World::CameraHolder::CameraHolder(const Camera &camera) : Camera(camera) {
 }
 
+std::vector<World::ObjectHolder> &World::GetObjects() {
+    return objects_;
+}
+std::vector<World::TLightHolder<PointLightSource>> &World::GetLights() {
+    return point_lights_;
+}
+World::CameraHolder &World::GetCameraHolder() {
+    return cameras_[current_camera_ind_];
+};
+World::Vector3d World::ObjectHolder::GetDirection() const {
+    return {0, 0, -1};
+}
+World::Vector3d World::ObjectHolder::GetNormal() const {
+    return {0, 1, 0};
+}
 }  // namespace renderer

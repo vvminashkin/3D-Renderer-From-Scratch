@@ -11,9 +11,9 @@ public:
 
 private:
     static constexpr double kDefaultIntencity = 1;
-    static constexpr double kDefaultConstantAttenuation = 0.2;
-    static constexpr double kDefaultLinearAttenuation = 0.1;
-    static constexpr double kDefaultQuadraticAttenuation = 0.1;
+    static constexpr double kDefaultConstantAttenuation = 1;
+    static constexpr double kDefaultLinearAttenuation = 0.01;
+    static constexpr double kDefaultQuadraticAttenuation = 0.01;
     static const RGB kDefaultColor;
     double initial_intencity_ = kDefaultIntencity;
     double constant_attenuation_ = kDefaultConstantAttenuation;

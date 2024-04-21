@@ -12,7 +12,7 @@ renderer::BasicObject::BasicObject() {
 renderer::Mesh &renderer::BasicObject::GetMesh(size_t index) {
     return meshes_[index];
 }
-Iterable<BasicObject::MeshConstIterator> BasicObject::GetMesh() const {
+Iterable<BasicObject::MeshConstIterator> BasicObject::GetMeshes() const {
     return Iterable<MeshConstIterator>(meshes_.begin(), meshes_.end());
 }
 
@@ -24,7 +24,7 @@ void renderer::BasicObject::AddMesh(RGB ambient, RGB diffuse, RGB specular) {
         [specular](const Triangle &, const Vector3d &b_coordinates) { return specular; });
 }
 
-Iterable<BasicObject::MeshConstIterator> renderer::Sphere::GetMesh() const {
+Iterable<BasicObject::MeshConstIterator> renderer::Sphere::GetMeshes() const {
     return Iterable<MeshConstIterator>(meshes_.begin(), meshes_.end());
 }
 renderer::Sphere::Sphere(RGB ambient, RGB diffuse, RGB specular, double radius,

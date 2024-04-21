@@ -28,10 +28,10 @@ public:
     void SwitchLightModel();
     std::unique_ptr<Screen> Draw(const World &world, size_t width, size_t height);
     void ShiftLightToAlignCamera(const World &, LightSourcesDescription *desc);
-    void ShiftTriangleCoordinates(const World::ObjectHolder &owner, Triangle *);
+    void ShiftTriangleCoordinates(const AnyConstHolderPointer owner, Triangle *);
     void ShiftTriangleToAlignCamera(const World &, Triangle *);
     void DrawTriangle(const Mesh::ITriangle &current, const Mesh &,
-                      const World::ObjectHolder &owner_object, const World &world,
+                      AnyConstHolderPointer owner_object, const World &world,
                       const LightSourcesDescription &, Screen *screen);
 
     void RasterizeTriangle(const BarycentricCoordinateSystem &, const Eigen::Matrix3d &,

@@ -13,7 +13,7 @@ public:
     using Matrix3d = Eigen::Matrix3d;
     void AddTriangle(const Matrix3d&, size_t index = 0);
     void AddTriangle(const Matrix3d&, const Matrix3d&, size_t index = 0);
-    Iterable<MeshConstIterator> GetMesh() const;
+    Iterable<MeshConstIterator> GetMeshes() const;
     void AddMesh(RGB ambient, RGB diffuse, RGB specular);
     Mesh& GetMesh(size_t index = 0);
 
@@ -28,7 +28,7 @@ public:
     Sphere(RGB ambient, RGB diffuse, RGB specular, double radius = 1.0,
            size_t max_triangle_count = 320);
     using Matrix3d = Eigen::Matrix3d;
-    Iterable<MeshConstIterator> GetMesh() const;
+    Iterable<MeshConstIterator> GetMeshes() const;
     Mesh& GetMesh(size_t index = 0);
 
 private:

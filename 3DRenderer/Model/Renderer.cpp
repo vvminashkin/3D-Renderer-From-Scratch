@@ -88,13 +88,12 @@ void Renderer::ShiftLightToAlignCamera(const World &world, LightSourcesDescripti
         Vector4d temp = Vector4d::Ones();
         temp.topLeftCorner<3, 1>() = world.GetPointLightSources()[i].GetCoordinates();
         desc->point_light_coordinates_.push_back(transformation_matrix * temp);
-        // std::cout<<(transformation_matrix*temp).transpose()<<'b'<<i<<std::endl;
     }
 }
-void Renderer::ShiftTriangleCoordinates(const World::ObjectHolder &owner, Triangle *vertices) {
+void Renderer::ShiftTriangleCoordinates(AnyConstHolderPointer owner, Triangle *vertices) {
     assert(vertices != nullptr);
     Matrix34d transformation_matrix =
-        Renderer::MakeHomogeneousTransformationMatrix(owner.GetAngle(), owner.GetCoordinates());
+        Renderer::MakeHomogeneousTransformationMatrix(owner->GetAngle(), owner->GetCoordinates());
     Renderer::ApplyMatrix(transformation_matrix, &(*vertices));
 }
 
@@ -111,16 +110,22 @@ std::unique_ptr<Screen> Renderer::Draw(const World &world, size_t width, size_t 
     LightSourcesDescription light_desc;
     ShiftLightToAlignCamera(world, &light_desc);
     for (const auto &object : world.GetObjectsIterable()) {
-        for (const auto &mesh : object->GetMesh()) {
+        for (const auto &mesh : object->GetMeshes()) {
             for (const auto &triangle : mesh.GetTriangles()) {
-                DrawTriangle(triangle, mesh, object, world, light_desc, screen.get());
+                DrawTriangle(triangle, mesh, &object, world, light_desc, screen.get());
             }
+        }
+    }
+    for (const auto &point_lights : world.GetPointLightSources()) {
+        for (const auto &triangle : point_lights.GetRepresentingMesh().GetTriangles()) {
+            DrawTriangle(triangle, point_lights.GetRepresentingMesh(), &point_lights, world,
+                         light_desc, screen.get());
         }
     }
     return screen;
 }
 void Renderer::DrawTriangle(const Mesh::ITriangle &current, const Mesh &mesh,
-                            const World::ObjectHolder &owner_object, const World &world,
+                            AnyConstHolderPointer owner_object, const World &world,
                             const LightSourcesDescription &light_desc, Screen *screen) {
     Triangle vertices = mesh.MakeTriangleVertices(current);
     ShiftTriangleCoordinates(owner_object, &vertices);
@@ -311,14 +316,12 @@ void Renderer::ClipAllTriangles(const Eigen::Vector4d &plane,
         --it;
     }
 }
-Vector3d delete_this;
 RGB Renderer::CalculateBlinnPhong(const RGB &ambient_color, const RGB &diffuse_color,
                                   const RGB &specular_color, const LightSourcesDescription &desc,
                                   const World &world, const Vector3d &b_coordinates,
                                   const Triangle &triangle) {
     RGB ans{0, 0, 0};
     Vector3d position = b_coordinates.transpose() * triangle.GetVerticiesCoordinates();
-    delete_this = b_coordinates;
 
     Vector3d normal = triangle.GetNormal(b_coordinates);
     const Vector3d &real_normal = triangle.GetRealNormal();
@@ -338,9 +341,6 @@ RGB Renderer::CalculateBlinnPhongDiffusion(const RGB &diffuse_color,
     RGB ans = {0, 0, 0};
     for (int i = 0; i < world.GetPointLightSources().size(); ++i) {
         Vector3d direction = (desc.point_light_coordinates_[i] - coordinates).eval().normalized();
-        if (delete_this.minCoeff() >= 0.332) {
-            // std::cout<<direction.dot(normal)<<std::endl;
-        }
         if ((-(-1 + 2 * std::signbit(normal.dot(direction)))) < 0) {
             continue;
         }

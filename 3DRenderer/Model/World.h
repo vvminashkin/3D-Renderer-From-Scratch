@@ -6,6 +6,8 @@
 #include "Eigen/src/Core/Matrix.h"
 #include "Light/AmbientLight.h"
 #include "Light/PointLight.h"
+#include "AnyHolderPointer.h"
+#include "Object.h"
 #include <iostream>
 
 namespace renderer {
@@ -16,6 +18,7 @@ public:
     using Quaterniond = Eigen::Quaterniond;
     template <typename T>
     class TLightHolder;
+    class CameraHolder;
     World(int width, int height);
     auto GetObjectsIterable() const {
         return Iterable(objects_.begin(), objects_.end());
@@ -28,9 +31,10 @@ public:
     const Quaterniond &GetCameraRotation() const;
     const Vector3d &GetCameraPosition() const;
     const Camera &GetCamera() const;
+    CameraHolder &GetCameraHolder();
     const std::vector<AmbientLightSource> &GetAmbientLightSources() const;
     const std::vector<TLightHolder<PointLightSource>> &GetPointLightSources() const;
-
+    std::vector<World::TLightHolder<PointLightSource>> &GetPointLightSources();
     void SetCameraRotation(const Quaterniond &);
     void SetCameraPosition(const Vector3d &);
 
@@ -43,8 +47,14 @@ public:
         void SetCoordinates(const Vector3d &);
         void SetAngle(const Quaterniond &);
 
-        static const Vector3d kDefaultDirection;
-        static const Vector3d kDefaultNormal;
+        Vector3d GetDirection();
+        Vector3d GetNormal();
+        Vector3d GetDefaultDirection() const {
+            return {0, 0, -1};
+        }
+        Vector3d GetDefaultNormal() const {
+            return {0, 1, 0};
+        }
 
     private:
         Eigen::Vector3d coordinates_ = World::GetOrigin();
@@ -63,6 +73,15 @@ public:
         void SetAngle(const Quaterniond &);
         void SetAngle(const Eigen::AngleAxis<double> &);
 
+        Vector3d GetDirection() const;
+        Vector3d GetNormal() const;
+        Vector3d GetDefaultDirection() const {
+            return {0, 0, -1};
+        }
+        Vector3d GetDefaultNormal() const {
+            return {0, 1, 0};
+        }
+
     private:
         Eigen::Vector3d coordinates_ = World::GetOrigin();
         Eigen::Quaterniond rotation_;
@@ -72,21 +91,20 @@ public:
     class TLightHolder : public T {
     public:
         TLightHolder(const Vector3d &coordinates) : coordinates_(coordinates) {
+            representing_triangle_.AddMesh({0, 10, 10}, {1, 1, 1}, {1, 1, 1});
+            representing_triangle_.AddTriangle(GetSmallTriangle());
         }
         TLightHolder(T &&obj, const Vector3d &coordinates, const Eigen::AngleAxisd &angle)
             : T(obj), coordinates_(coordinates), rotation_(angle) {
+            representing_triangle_.AddMesh({0, 10, 10}, {1, 1, 1}, {1, 1, 1});
+            representing_triangle_.AddTriangle(GetSmallTriangle());
         }
         TLightHolder(const T &obj) : T(obj) {
         }
         TLightHolder(T &&obj) noexcept : T(obj) {
         }
-        Eigen::Matrix3d GetSmallTriangle() const {
-            Eigen::Matrix3d ans;
-            ans << coordinates_(0) + 0.05, coordinates_(1) + 0.05, coordinates_(2),
-                coordinates_(0) - 0.05, coordinates_(1) + 0.05, coordinates_(2), coordinates_(0),
-                coordinates_(1) - 0.05, coordinates_(2);
-            std::cout << ans << std::endl;
-            return ans;
+        const Mesh &GetRepresentingMesh() const {
+            return *(representing_triangle_.GetMeshes().begin());
         }
         const Vector3d &GetCoordinates() const {
             return coordinates_;
@@ -104,12 +122,34 @@ public:
         void SetAngle(const Eigen::AngleAxis<double> &rotation) {
             rotation_ = rotation;
         }
+        Vector3d GetDirection() const {
+            return {0, 0, -1};
+        }
+        Vector3d GetNormal() const {
+            return {0, 1, 0};
+        }
+        Vector3d GetDefaultDirection() const {
+            return {0, 0, -1};
+        }
+        Vector3d GetDefaultNormal() const {
+            return {0, 1, 0};
+        }
 
     private:
+        using ColorFunction = const std::function<RGB(const Triangle &, const Vector3d &)>;
+        Eigen::Matrix3d GetSmallTriangle() const {
+            Eigen::Matrix3d ans;
+            ans << 0.05, 0.05, 0, -0.05, 0.05, 0, 0, -0.05, 0;
+            return ans;
+        }
+
         Eigen::Vector3d coordinates_ = World::GetOrigin();
         Eigen::Quaterniond rotation_ = Quaterniond::Identity();
+        BasicObject representing_triangle_;
     };
     static Vector3d GetOrigin();
+    std::vector<ObjectHolder> &GetObjects();
+    std::vector<TLightHolder<PointLightSource>> &GetLights();
 
 private:
     std::vector<AmbientLightSource> ambient_lights_;

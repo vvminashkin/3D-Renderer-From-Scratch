@@ -16,15 +16,14 @@ GraphicEngine::GraphicEngine(int width, int height)
       current_screen_(width, height),
       update_port_([this]() -> PortReturnType { return this->current_screen_; }),
       world_(width, height) {
-
+    selected_ = &world_.GetCameraHolder();
     ReadAllFromDirectory("Models", &world_);
     world_.AddAmbientLight();
-    world_.AddPointLight({0.4, 4.3, 2.9});
-
-    renderer::BasicObject objectlight;
-    objectlight.AddMesh({0, 10, 10}, {1, 1, 1}, {1, 1, 1});
-    objectlight.AddTriangle(world_.GetPointLightSources()[0].GetSmallTriangle());
-    world_.AddObject(objectlight);
+    world_.AddPointLight({0, 0, 4});
+    world_.SetCameraPosition({0, 0, 4});
+    // world_.AddObject(renderer::Sphere{{1,1,1},{1,1,1},{1,1,1}});
+    // world_.AddPointLight({0.4, 4.3, 60});
+    // world_.SetCameraPosition({0,0,80});
 }
 
 const renderer::Screen& GraphicEngine::GetCurrentScreen() {
@@ -39,79 +38,116 @@ void GraphicEngine::TestUpdateProjection() {
     current_screen_ = std::move(screen);
     update_port_.notify();
 }
-void GraphicEngine::TiltCameraUp(double shift) {
-    Quaterniond camera_rotation = world_.GetCameraRotation();
-    Quaterniond new_quatenion = Quaterniond(camera_rotation.matrix() *
-                                            Eigen::AngleAxisd(shift, Vector3d{1, 0, 0}).matrix());
-    new_quatenion.normalize();
-    world_.SetCameraRotation(new_quatenion);
+GraphicEngine::AnyHolderPointer GraphicEngine::GetSelected() {
+    return selected_;
+    ;
 }
-void GraphicEngine::TiltCameraDown(double shift) {
-    Quaterniond camera_rotation = world_.GetCameraRotation();
-    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
-    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
-    Vector3d axis_of_rotation = direction.cross(normal);
-    Quaterniond new_quatenion = Quaterniond(camera_rotation.matrix() *
-                                            Eigen::AngleAxisd(-shift, Vector3d{1, 0, 0}).matrix());
-    new_quatenion.normalize();
-    world_.SetCameraRotation(new_quatenion);
-}
-void GraphicEngine::TiltCameraRight(double shift) {
-    Quaterniond camera_rotation = world_.GetCameraRotation();
+void GraphicEngine::TiltUp(double shift, AnyHolderPointer selected) {
+    Quaterniond rotation = selected->GetAngle();
     Quaterniond new_quatenion =
-        Quaterniond(camera_rotation.matrix() *
-                    Eigen::AngleAxisd(-shift, World::CameraHolder::kDefaultNormal).matrix());
+        Quaterniond(rotation.matrix() * Eigen::AngleAxisd(shift, Vector3d{1, 0, 0}).matrix());
     new_quatenion.normalize();
-    world_.SetCameraRotation(new_quatenion);
+    selected->SetAngle(new_quatenion);
 }
-void GraphicEngine::TiltCameraLeft(double shift) {
+void GraphicEngine::TiltDown(double shift, AnyHolderPointer selected) {
+    Quaterniond rotation = selected->GetAngle();
+    Quaterniond new_quatenion =
+        Quaterniond(rotation.matrix() * Eigen::AngleAxisd(-shift, Vector3d{1, 0, 0}).matrix());
+    new_quatenion.normalize();
+    selected->SetAngle(new_quatenion);
+}
+void GraphicEngine::TiltRight(double shift, AnyHolderPointer selected) {
+    Quaterniond rotation = selected->GetAngle();
+    Quaterniond new_quatenion =
+        Quaterniond(rotation.matrix() * Eigen::AngleAxisd(-shift, selected->GetNormal()).matrix());
+    new_quatenion.normalize();
+    selected->SetAngle(new_quatenion);
+}
+void GraphicEngine::TiltLeft(double shift, AnyHolderPointer selected) {
 
-    Quaterniond camera_rotation = world_.GetCameraRotation();
-    Quaterniond new_quatenion =
-        Quaterniond(camera_rotation.matrix() *
-                    Eigen::AngleAxisd(shift, World::CameraHolder::kDefaultNormal).matrix());
+    Quaterniond rotation = selected->GetAngle();
+    Quaterniond new_quatenion = Quaterniond(
+        rotation.matrix() * Eigen::AngleAxisd(shift, selected->GetDefaultNormal()).matrix());
     new_quatenion.normalize();
-    world_.SetCameraRotation(new_quatenion);
+    selected->SetAngle(new_quatenion);
 }
-void GraphicEngine::MoveCameraUp(double shift) {
-    Quaterniond camera_rotation = world_.GetCameraRotation();
-    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
-    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
-    world_.SetCameraPosition(world_.GetCameraPosition() + normal * shift);
+
+void GraphicEngine::MoveUp(double shift, AnyHolderPointer selected) {
+
+    Quaterniond rotation = selected->GetAngle();
+    Vector3d normal = selected->GetNormal();
+    selected->SetCoordinates(selected->GetCoordinates() + normal * shift);
 }
-void GraphicEngine::MoveCameraDown(double shift) {
-    Quaterniond camera_rotation = world_.GetCameraRotation();
-    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
-    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
-    world_.SetCameraPosition(world_.GetCameraPosition() - normal * shift);
+void GraphicEngine::MoveDown(double shift, AnyHolderPointer selected) {
+    Quaterniond rotation = selected->GetAngle();
+    Vector3d normal = selected->GetNormal();
+    selected->SetCoordinates(selected->GetCoordinates() - normal * shift);
 }
-void GraphicEngine::MoveCameraRight(double shift) {
-    Quaterniond camera_rotation = world_.GetCameraRotation();
-    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
-    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
+void GraphicEngine::MoveRight(double shift, AnyHolderPointer selected) {
+    Quaterniond rotation = selected->GetAngle();
+    Vector3d direction = selected->GetDirection();
+    Vector3d normal = selected->GetNormal();
     Vector3d axis_of_rotation = direction.cross(normal);
-    world_.SetCameraPosition(world_.GetCameraPosition() + axis_of_rotation * shift);
+    selected->SetCoordinates(selected->GetCoordinates() + axis_of_rotation * shift);
 }
-void GraphicEngine::MoveCameraLeft(double shift) {
-    Quaterniond camera_rotation = world_.GetCameraRotation();
-    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
-    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
+void GraphicEngine::MoveLeft(double shift, AnyHolderPointer selected) {
+    Quaterniond rotation = selected->GetAngle();
+    Vector3d direction = selected->GetDirection();
+    Vector3d normal = selected->GetNormal();
     Vector3d axis_of_rotation = direction.cross(normal);
-    world_.SetCameraPosition(world_.GetCameraPosition() - axis_of_rotation * shift);
+    selected->SetCoordinates(selected->GetCoordinates() - axis_of_rotation * shift);
 }
-void GraphicEngine::MoveCameraForward(double shift) {
-    Quaterniond camera_rotation = world_.GetCameraRotation();
-    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
-    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
-    world_.SetCameraPosition(world_.GetCameraPosition() + direction * shift);
+void GraphicEngine::MoveForward(double shift, AnyHolderPointer selected) {
+    Quaterniond rotation = selected->GetAngle();
+    Vector3d direction = selected->GetDirection();
+    selected->SetCoordinates(selected->GetCoordinates() + direction * shift);
 }
-void GraphicEngine::MoveCameraBackward(double shift) {
-    Quaterniond camera_rotation = world_.GetCameraRotation();
-    Vector3d direction = camera_rotation * World::CameraHolder::kDefaultDirection;
-    Vector3d normal = camera_rotation * World::CameraHolder::kDefaultNormal;
-    world_.SetCameraPosition(world_.GetCameraPosition() - direction * shift);
+void GraphicEngine::MoveBackward(double shift, AnyHolderPointer selected) {
+    Quaterniond rotation = selected->GetAngle();
+    Vector3d direction = selected->GetDirection();
+    selected->SetCoordinates(selected->GetCoordinates() - direction * shift);
 }
 void GraphicEngine::SwitchLightingModel() {
     renderer_.SwitchLightModel();
+}
+void GraphicEngine::SwitchObject() {
+    if (world_.GetObjects().empty()) {
+        return;
+    }
+    if (is_changing_objects_) {
+        ++selected_obj_;
+        if (selected_obj_ == world_.GetObjects().size()) {
+            selected_obj_ = 0;
+        }
+    } else {
+        ResetEditingStates();
+        is_changing_objects_ = true;
+    }
+    selected_ = &world_.GetObjects()[selected_obj_];
+}
+void GraphicEngine::SwitchCamera() {
+    ResetEditingStates();
+    is_changing_camera_ = true;
+    selected_ = &world_.GetCameraHolder();
+}
+void GraphicEngine::SwitchLight() {
+    if (world_.GetPointLightSources().empty()) {
+        return;
+    }
+    if (is_changing_point_lights_) {
+        ++selected_point_light_;
+        if (selected_point_light_ == world_.GetPointLightSources().size()) {
+            selected_point_light_ = 0;
+        }
+    } else {
+        ResetEditingStates();
+        is_changing_point_lights_ = true;
+    }
+    selected_ = &world_.GetPointLightSources()[selected_point_light_];
+}
+void GraphicEngine::ResetEditingStates() {
+    is_changing_objects_ = false;
+    is_changing_camera_ = false;
+    is_changing_point_lights_ = false;
 }
 }  // namespace kernel
