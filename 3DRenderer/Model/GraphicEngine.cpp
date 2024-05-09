@@ -59,8 +59,8 @@ void GraphicEngine::TiltDown(double shift, AnyHolderPointer selected) {
 }
 void GraphicEngine::TiltRight(double shift, AnyHolderPointer selected) {
     Quaterniond rotation = selected->GetAngle();
-    Quaterniond new_quatenion =
-        Quaterniond(rotation.matrix() * Eigen::AngleAxisd(-shift, selected->GetNormal()).matrix());
+    Quaterniond new_quatenion = Quaterniond(
+        rotation.matrix() * Eigen::AngleAxisd(-shift, selected->GetDefaultNormal()).matrix());
     new_quatenion.normalize();
     selected->SetAngle(new_quatenion);
 }
@@ -150,5 +150,17 @@ void GraphicEngine::ResetEditingStates() {
     is_changing_objects_ = false;
     is_changing_camera_ = false;
     is_changing_point_lights_ = false;
+}
+void GraphicEngine::AddPointLight() {
+    world_.AddPointLight(world_.GetCameraPosition());
+}
+void GraphicEngine::ChangeSelectedLight(double c_attenuation, double l_attenuation,
+                                        double q_attenuation) {
+    auto& lights = world_.GetLights();
+    lights[selected_point_light_].SetParameters(c_attenuation, l_attenuation, q_attenuation);
+}
+void GraphicEngine::ToggleSelectedLight() {
+    auto& lights = world_.GetLights();
+    lights[selected_point_light_].Toggle();
 }
 }  // namespace kernel

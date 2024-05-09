@@ -34,6 +34,11 @@ public:
     void SwitchCamera();
     void SwitchLight();
 
+    // adds at camera location
+    void AddPointLight();
+    void ChangeSelectedLight(double c_attenuation, double l_attenuation, double q_attenuation);
+    void ToggleSelectedLight();
+
 private:
     void ResetEditingStates();
     using PortReturnType = observer::CObservable<const Screen>::CReturn;
