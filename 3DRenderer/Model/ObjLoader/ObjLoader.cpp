@@ -49,13 +49,13 @@ BasicObject ReadObject(const std::string &path) {
         for (int j = 0; j < mesh.Indices.size() - mesh.Indices.size() % 3; j += 3) {
             Matrix3d coords;
             coords.row(0) = MakeVector3d(mesh.Vertices[mesh.Indices[j]].Position);
-            coords.row(1) = MakeVector3d(mesh.Vertices[mesh.Indices[j + 1]].Position);
-            coords.row(2) = MakeVector3d(mesh.Vertices[mesh.Indices[j + 2]].Position);
+            coords.row(2) = MakeVector3d(mesh.Vertices[mesh.Indices[j + 1]].Position);
+            coords.row(1) = MakeVector3d(mesh.Vertices[mesh.Indices[j + 2]].Position);
 
             Matrix3d normals;
             normals.row(0) = MakeVector3d(mesh.Vertices[mesh.Indices[j]].Normal);
-            normals.row(1) = MakeVector3d(mesh.Vertices[mesh.Indices[j + 1]].Normal);
-            normals.row(2) = MakeVector3d(mesh.Vertices[mesh.Indices[j + 2]].Normal);
+            normals.row(2) = MakeVector3d(mesh.Vertices[mesh.Indices[j + 1]].Normal);
+            normals.row(1) = MakeVector3d(mesh.Vertices[mesh.Indices[j + 2]].Normal);
             ans.AddTriangle(coords, normals, i);
         }
         ans.GetMesh(i).SetNormalFunction(

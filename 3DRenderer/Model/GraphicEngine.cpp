@@ -21,7 +21,8 @@ GraphicEngine::GraphicEngine(int width, int height)
     world_.AddAmbientLight();
     world_.AddPointLight({0, 0, 4});
     world_.SetCameraPosition({0, 0, 4});
-    // world_.AddObject(renderer::Sphere{{1,1,1},{1,1,1},{1,1,1}});
+
+    world_.AddObject(renderer::Sphere{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}});
     // world_.AddPointLight({0.4, 4.3, 60});
     // world_.SetCameraPosition({0,0,80});
 }

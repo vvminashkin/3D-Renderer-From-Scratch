@@ -50,6 +50,7 @@ renderer::Sphere::Sphere(RGB ambient, RGB diffuse, RGB specular, double radius,
     for (const auto &triangle : triangles) {
         meshes_[0].AddTriangle(triangle * radius, triangle);
     }
+
     meshes_[0].SetNormalFunction(
         [](const renderer::Triangle &tr, const Vector3d &b_coords) -> Vector3d {
             Vector3d ans = Vector3d::Zero();
@@ -114,7 +115,7 @@ std::list<Sphere::Matrix3d> Sphere::MakeIcosahedron() {
         Vector3d normal =
             (triangle.row(0) - triangle.row(1)).cross(triangle.row(0) - triangle.row(2));
         normal = -normal;
-        if (normal.dot(triangle.row(0)) < 0) {
+        if (normal.dot(triangle.row(0)) > 0) {
             Vector3d r1 = triangle.row(0);
             Vector3d r2 = triangle.row(1);
             triangle.row(0) = r2;
