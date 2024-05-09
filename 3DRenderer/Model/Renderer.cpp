@@ -80,6 +80,9 @@ size_t RoundUp(double coordinate) {
 void Renderer::SwitchLightModel() {
     use_blinn_phong_ = !use_blinn_phong_;
 }
+void Renderer::ToggleLightMarkers() {
+    render_light_markers_ = !render_light_markers_;
+}
 void Renderer::ShiftLightToAlignCamera(const World &world, LightSourcesDescription *desc) {
     Matrix34d transformation_matrix = Renderer::MakeHomogeneousTransformationMatrix(
         world.GetCameraRotation().inverse(),
@@ -115,6 +118,9 @@ std::unique_ptr<Screen> Renderer::Draw(const World &world, size_t width, size_t 
                 DrawTriangle(triangle, mesh, &object, world, light_desc, screen.get());
             }
         }
+    }
+    if (!render_light_markers_) {
+        return screen;
     }
     for (const auto &point_lights : world.GetPointLightSources()) {
         for (const auto &triangle : point_lights.GetRepresentingMesh().GetTriangles()) {

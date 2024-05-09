@@ -26,6 +26,7 @@ public:
         std::vector<Vector3d> point_light_coordinates_;
     };
     void SwitchLightModel();
+    void ToggleLightMarkers();
     std::unique_ptr<Screen> Draw(const World &world, size_t width, size_t height);
     void ShiftLightToAlignCamera(const World &, LightSourcesDescription *desc);
     void ShiftTriangleCoordinates(const AnyConstHolderPointer owner, Triangle *);
@@ -60,6 +61,7 @@ public:
 
 private:
     bool use_blinn_phong_ = true;
+    bool render_light_markers_ = true;
     static Matrix34d MakeHomogeneousTransformationMatrix(const Quaterniond &rotation,
                                                          const Vector3d &offset);
     static void ApplyMatrix(const Matrix34d &, Triangle *);

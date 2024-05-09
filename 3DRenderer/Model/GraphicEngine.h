@@ -30,6 +30,7 @@ public:
     void Subscribe(observer::CObserver<const Screen>* obs);
     void TestUpdateProjection();
     void SwitchLightingModel();
+    void ToggleLightMarkers();
     void SwitchObject();
     void SwitchCamera();
     void SwitchLight();

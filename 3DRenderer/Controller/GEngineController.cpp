@@ -80,7 +80,7 @@ bool GEngineController::HandleKeyPressedEvent(const sf::Event::KeyEvent& event) 
             break;
         case sf::Keyboard::Q:
             double c_attenuation, l_attenuation, q_attenuation;
-            std::cout << "Please enter light parameters" << std::endl;
+            std::cout << "Enter light parameters" << std::endl;
             std::cout << "Constant attenuation:" << std::endl;
             std::cin >> c_attenuation;
             std::cout << "Linear attenuation:" << std::endl;
@@ -92,6 +92,10 @@ bool GEngineController::HandleKeyPressedEvent(const sf::Event::KeyEvent& event) 
             break;
         case sf::Keyboard::I:
             model_->ToggleSelectedLight();
+            model_->TestUpdateProjection();
+            break;
+        case sf::Keyboard::Num1:
+            model_->ToggleLightMarkers();
             model_->TestUpdateProjection();
             break;
         default:

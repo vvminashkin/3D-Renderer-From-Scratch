@@ -111,6 +111,9 @@ void GraphicEngine::MoveBackward(double shift, AnyHolderPointer selected) {
 void GraphicEngine::SwitchLightingModel() {
     renderer_.SwitchLightModel();
 }
+void GraphicEngine::ToggleLightMarkers() {
+    renderer_.ToggleLightMarkers();
+}
 void GraphicEngine::SwitchObject() {
     if (world_.GetObjects().empty()) {
         return;
