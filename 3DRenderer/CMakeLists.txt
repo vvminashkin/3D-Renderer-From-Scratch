@@ -3,10 +3,13 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 #find_package(SFML )
 #set_source_files_properties(tags PROPERTIES GENERATED true)
 
-find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
-#add_custom_command(OUTPUT tags
-#    COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .
-#        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+
+include(FetchContent)
+FetchContent_Declare(SFML
+    GIT_REPOSITORY https://github.com/SFML/SFML.git
+    GIT_TAG 2.6.x)
+FetchContent_MakeAvailable(SFML)
 add_executable(${PROJECT_NAME} main.cpp 
         Model/Mesh.cpp
         Model/Vertex.cpp
