@@ -25,6 +25,7 @@ Vector3d MakeVector3d(const objl::Vector3 &vec) {
 
 }  // namespace
 void ReadAllFromDirectory(std::string path, renderer::World *world) {
+    std::filesystem::create_directory(path);
     for (const auto &entry : std::filesystem::directory_iterator(path)) {
         std::string file_path = entry.path().string();
         if (file_path.substr(file_path.size() - 4, file_path.size()) == ".obj") {
