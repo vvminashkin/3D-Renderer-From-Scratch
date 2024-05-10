@@ -18,6 +18,7 @@ Application::Application()
       view_(kDefaultWidth, kDefaultHeight),
       controller_(&model_) {
     model_.Subscribe(view_.GetRecievePort());
+    controller_.InitEnviroment();
 }
 void Application::Run() {
     bool closed = false;

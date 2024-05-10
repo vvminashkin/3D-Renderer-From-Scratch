@@ -14,6 +14,8 @@ public:
     using RGB = renderer::RGB;
     using AnyHolderPointer = renderer::AnyHolderPointer;
     GraphicEngine(int width, int height);
+    void InitializeSphereEnviroment();
+    void InitializeUserEnviroment();
     AnyHolderPointer GetSelected();
     void TiltUp(double shift, AnyHolderPointer selected);
     void TiltDown(double shift, AnyHolderPointer selected);
@@ -28,7 +30,7 @@ public:
     void MoveBackward(double shift, AnyHolderPointer selected);
 
     void Subscribe(observer::CObserver<const Screen>* obs);
-    void TestUpdateProjection();
+    void Update();
     void SwitchLightingModel();
     void ToggleLightMarkers();
     void SwitchObject();

@@ -49,10 +49,18 @@ cd release
 ```shell
 cmake .. -DCMAKE_BUILD_TYPE=Release
 ```
+или для `ninja`
+```shell
+cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
+```
 `cmake` сам скачает SFML
 + Запустить сборку:
 ```shell
 make
+```
+или
+```shell
+ninja
 ```
 При возникновении проблем обратиться к [документации SFML](https://www.sfml-dev.org/tutorials/2.6/start-cmake.php) или [общий туториал по работе с SFML](https://www.sfml-dev.org/tutorials/2.6/)
 

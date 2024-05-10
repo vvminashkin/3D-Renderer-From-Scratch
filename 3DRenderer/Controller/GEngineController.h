@@ -12,6 +12,7 @@ public:
     GEngineController(GraphicEngine* model);
     bool HandleEvent(const sf::Event&);
 
+    void InitEnviroment();
     void HandleStallEvent();
 
 private:

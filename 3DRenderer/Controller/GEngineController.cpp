@@ -63,7 +63,7 @@ bool GEngineController::HandleKeyPressedEvent(const sf::Event::KeyEvent& event) 
             break;
         case sf::Keyboard::L:
             model_->SwitchLightingModel();
-            model_->TestUpdateProjection();
+            model_->Update();
             break;
         case sf::Keyboard::O:
             model_->SwitchObject();
@@ -76,7 +76,7 @@ bool GEngineController::HandleKeyPressedEvent(const sf::Event::KeyEvent& event) 
             break;
         case sf::Keyboard::E:
             model_->AddPointLight();
-            model_->TestUpdateProjection();
+            model_->Update();
             break;
         case sf::Keyboard::Q:
             double c_attenuation, l_attenuation, q_attenuation;
@@ -88,15 +88,15 @@ bool GEngineController::HandleKeyPressedEvent(const sf::Event::KeyEvent& event) 
             std::cout << "Quadratic attenuation:" << std::endl;
             std::cin >> q_attenuation;
             model_->ChangeSelectedLight(c_attenuation, l_attenuation, q_attenuation);
-            model_->TestUpdateProjection();
+            model_->Update();
             break;
         case sf::Keyboard::I:
             model_->ToggleSelectedLight();
-            model_->TestUpdateProjection();
+            model_->Update();
             break;
         case sf::Keyboard::Num1:
             model_->ToggleLightMarkers();
-            model_->TestUpdateProjection();
+            model_->Update();
             break;
         default:
             break;
@@ -151,7 +151,26 @@ void GEngineController::HandleKeys() {
         }
     }
     if (!pressed_keys_.empty()) {
-        model_->TestUpdateProjection();
+        model_->Update();
+    }
+}
+void GEngineController::InitEnviroment() {
+    std::cout << "Enter number of 3D enviroment:" << std::endl;
+    std::cout << "1. Spheres showcase" << std::endl;
+    std::cout << "2. Custom enviroment" << std::endl;
+    int input;
+    std::cin >> input;
+    switch (input) {
+        case 1:
+            model_->InitializeSphereEnviroment();
+            return;
+        case 2:
+            model_->InitializeUserEnviroment();
+            return;
+        default:
+            std::cout << "Invalid enviroment number" << std::endl;
+            InitEnviroment();
+            return;
     }
 }
 }  // namespace interface

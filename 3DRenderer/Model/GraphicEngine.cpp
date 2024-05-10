@@ -16,15 +16,28 @@ GraphicEngine::GraphicEngine(int width, int height)
       current_screen_(width, height),
       update_port_([this]() -> PortReturnType { return this->current_screen_; }),
       world_(width, height) {
+}
+void GraphicEngine::InitializeSphereEnviroment() {
     selected_ = &world_.GetCameraHolder();
-    ReadAllFromDirectory("Models", &world_);
     world_.AddAmbientLight();
     world_.AddPointLight({0, 0, 4});
     world_.SetCameraPosition({0, 0, 4});
 
     world_.AddObject(renderer::Sphere{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}});
-    // world_.AddPointLight({0.4, 4.3, 60});
-    // world_.SetCameraPosition({0,0,80});
+    world_.AddObject(renderer::Sphere{{1, 1, 0}, {1, 1, 0}, {1, 1, 0}, 0.5}, Vector3d{1, 1, 1});
+    world_.AddObject(renderer::Sphere{{0, 1, 0}, {0, 1, 0}, {0, 1, 0}, 1.3, 1200},
+                     Vector3d{-1, 1, 1});
+    world_.AddObject(renderer::Sphere{{0, 1, 1}, {0, 1, 1}, {0, 1, 1}, 1.3, 1200},
+                     Vector3d{-1, 1, 7});
+    Update();
+}
+void GraphicEngine::InitializeUserEnviroment() {
+    selected_ = &world_.GetCameraHolder();
+    ReadAllFromDirectory("Models", &world_);
+    world_.AddAmbientLight();
+    world_.AddPointLight({0, 0, 4});
+    world_.SetCameraPosition({0, 0, 4});
+    Update();
 }
 
 const renderer::Screen& GraphicEngine::GetCurrentScreen() {
@@ -34,7 +47,7 @@ const renderer::Screen& GraphicEngine::GetCurrentScreen() {
 void GraphicEngine::Subscribe(observer::CObserver<const renderer::Screen>* obs) {
     update_port_.subscribe(obs);
 }
-void GraphicEngine::TestUpdateProjection() {
+void GraphicEngine::Update() {
     Screen screen(*renderer_.Draw(world_, width_, height_));
     current_screen_ = std::move(screen);
     update_port_.notify();
